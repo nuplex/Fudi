@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme" parent="android:Theme.Material.Light">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/action_bar_color</item>
+        <item name="android:windowBackground">@color/background_color</item>
     </style>
+
+    <style name="AppTheme.SplashScreen" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/action_bar_color</item>
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
+
 </resources>

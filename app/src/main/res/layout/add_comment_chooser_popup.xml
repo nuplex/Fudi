@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grayout"
+    android:id="@+id/comment__chooser_popup_frame"
+    android:clickable="true">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/comment_chooser_popup_window"
+        android:layout_marginTop="115dp"
+        android:layout_width="260dp"
+        android:layout_height="100dp"
+        android:background="@drawable/comment_popup_background"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/comment_chooser_popup_question"
+            android:textColor="@color/secondary_text_color"
+            android:id="@+id/comment_chooser_popup_question"
+            android:layout_marginTop="7dp"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:id="@+id/comment_chooser_popup_button_area"
+            android:gravity="center_vertical|center_horizontal">
+
+            <Button
+                android:layout_width="70dp"
+                android:layout_height="40dp"
+                android:text="@string/comment_popup_choose_review"
+                android:textColor="@color/default_text_color"
+                android:textAllCaps="false"
+                android:id="@+id/comment_chooser_popup_review_button"
+                android:background="@drawable/standard_button"
+                android:textSize="19sp" />
+
+            <Space
+                android:layout_width="20dp"
+                android:layout_height="1dp" />
+
+            <Button
+                android:layout_width="70dp"
+                android:layout_height="40dp"
+                android:text="@string/comment_popup_choose_normal"
+                android:textColor="@color/default_text_color"
+                android:textAllCaps="false"
+                android:id="@+id/comment_chooser_popup_general_button"
+                android:background="@drawable/standard_button"
+                android:textSize="19sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

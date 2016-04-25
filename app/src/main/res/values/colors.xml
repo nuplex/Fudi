@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme Colors -->
+    <color name="action_bar_color">#FC7A5E</color>
+    <color name="background_color">#FFFFFF</color>
+    <color name="splash_background_color">#fdbcae</color>
+    <color name="default_text_color">#FFFFFF</color>
+    <color name="secondary_text_color">#7A7A7A</color>
+    <color name="fudi_text_color">#FC7A5E</color>
+    <color name="text_entry_back">#FFFFFF</color>
+    <color name="text_entry_border">#F98F7D</color>
+    <color name="text_entry_border_blue">#74A6FF</color>
+    <color name="text_entry_border_white">#FFFFFF</color>
+
+    <color name="grayout">#66010101</color>
+
+    <color name="standard_button_color">#FC7A5E</color>
+    <color name="standard_button_pressed_color">#C9614B</color>
+
+    <color name="fud_post_vote_area_color">#F9C8C0</color>
+    <color name="fud_post_dishtitle_color">#7A7A7A</color>
+    <color name="fud_post_restaurant">#F98F7D</color>
+    <color name="fud_post_restaurant_dark">#9F5B50</color>
+    <color name="fud_post_time_color">#ADADAD</color>
+
+    <color name="comment_separator_color">#DEDEDE</color>
+    <color name="comment_review_vote_background_color">#FFFFFF</color>
+    <color name="fud_background_hold_color">#f6f6f6</color>
+
+    <color name="secondary_color">#c0d7ff</color>
+    <color name="secondary_color_darker">#74A6FF</color>
+</resources>

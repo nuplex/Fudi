@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="232dp"
+    android:layout_marginTop="20dp"
+    android:gravity="center"
+    android:id="@+id/fud_post_parent_layout"
+    android:background="@android:drawable/dialog_holo_light_frame">
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="285dp"
+        android:layout_height="match_parent"
+        android:id="@+id/fud_post_main">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:id="@+id/fud_post_image"
+            android:layout_gravity="center_horizontal"
+            android:scaleType="centerCrop"
+            android:background="#f6f6f6" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/fud_post_main_text"
+            android:layout_marginLeft="5dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dish Title"
+                android:id="@+id/fud_post_dishtitle"
+                android:textStyle="bold"
+                android:textColor="#7A7A7A"
+                android:singleLine="true"
+                android:textSize="18sp"
+                android:ellipsize="end" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Restaurant"
+                android:textColor="@color/fud_post_restaurant"
+                android:id="@+id/fud_post_restaurant"
+                android:singleLine="true"
+                android:textSize="15sp"
+                android:ellipsize="end" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$0.00"
+                android:id="@+id/fud_post_cost"
+                android:textSize="15sp"
+                android:textColor="@color/secondary_color_darker"
+                android:elegantTextHeight="false" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 sec ago"
+                android:id="@+id/fud_post_time"
+                android:textSize="11sp"
+                android:textColor="@color/fud_post_time_color"
+                android:singleLine="true" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:id="@+id/fud_post_vote_and_reply">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:id="@+id/fud_post_vote"
+            android:gravity="center_vertical|center_horizontal"
+            android:background="@color/fud_post_vote_area_color"
+            android:layout_gravity="center"
+            android:paddingBottom="15dp">
+
+            <ImageButton
+                android:layout_width="30dp"
+                android:layout_height="20dp"
+                android:id="@+id/fud_post_upvote_button"
+                android:background="@drawable/upvote_button"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp" />
+
+            <Space
+                android:layout_width="20px"
+                android:layout_height="10dp" />
+
+            <ImageButton
+                android:layout_width="30dp"
+                android:layout_height="20dp"
+                android:id="@+id/fud_post_downvote_button"
+                android:background="@drawable/downvote_button"/>
+
+            <Space
+                android:layout_width="20px"
+                android:layout_height="5dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="00"
+                android:id="@+id/fud_post_netvote_text"
+                android:layout_gravity="center"
+                android:textSize="25sp"
+                android:gravity="center_vertical|center_horizontal"
+                android:textColor="@color/default_text_color" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center_vertical|center_horizontal"
+            android:background="@color/fud_post_vote_area_color"
+            android:id="@+id/fudi_post_comment_button_area">
+
+            <Button
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="00"
+                android:textColor="@color/fud_post_vote_area_color"
+                android:background="@drawable/fudi_comments_button"
+                style="?android:borderlessButtonStyle"
+                android:id="@+id/fud_post_comment_button"
+                android:singleLine="true"
+                android:layout_margin="6dp"
+                android:paddingBottom="6dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
