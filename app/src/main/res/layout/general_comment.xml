@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:id="@+id/comment_container"
+    android:gravity="center_horizontal">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/comment_main"
+        android:minHeight="150dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:id="@+id/comment_main_desc"
+            android:minHeight="150dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="username"
+                android:id="@+id/comment_main_username"
+                android:textColor="@color/fud_post_dishtitle_color"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textIsSelectable="false"
+                android:singleLine="true"
+                android:layout_marginLeft="5dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 sec ago"
+                android:textColor="@color/fud_post_time_color"
+                android:id="@+id/comment_time"
+                android:textSize="14sp"
+                android:singleLine="true"
+                android:layout_marginLeft="15dp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="comment"
+            android:textSize="17sp"
+            android:textColor="@color/secondary_text_color"
+            android:id="@+id/comment_main_text"
+            android:paddingLeft="5dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:minHeight="150dp"
+        android:id="@+id/comment_vote"
+        android:layout_gravity="center|top"
+        android:gravity="center_vertical|center_horizontal"
+        android:measureWithLargestChild="true"
+        >
+
+        <ImageButton
+            android:layout_width="35dp"
+            android:layout_height="25dp"
+            android:id="@+id/comment_vote_upvote"
+            android:background="@drawable/comment_upvote_button"/>
+
+        <Space
+            android:layout_width="20px"
+            android:layout_height="10dp" />
+
+        <ImageButton
+            android:layout_width="35dp"
+            android:layout_height="25dp"
+            android:id="@+id/comment_vote_downvote"
+            android:background="@drawable/comment_downvote_button"/>
+
+        <Space
+            android:layout_width="20px"
+            android:layout_height="10dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/fud_post_vote_area_color"
+            android:text="00"
+            android:id="@+id/comment_vote_netvote"
+            android:layout_gravity="center"
+            android:textSize="25sp"
+            android:gravity="center_vertical|center_horizontal" />
+    </LinearLayout>
+</LinearLayout>

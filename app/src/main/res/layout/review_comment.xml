@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:id="@+id/review_comment_container"
+    android:gravity="center_horizontal">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/review_comment_main"
+        android:minHeight="350dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:id="@+id/review_comment_main_desc_img"
+            android:minHeight="150dp"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="username"
+                android:id="@+id/review_comment_main_username"
+                android:textColor="@color/fud_post_dishtitle_color"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textIsSelectable="false"
+                android:singleLine="true"
+                android:layout_marginLeft="5dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="4dp"
+                android:layout_alignParentEnd="false" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 sec ago"
+                android:textColor="@color/fud_post_time_color"
+                android:id="@+id/review_comment_time"
+                android:textSize="14sp"
+                android:singleLine="true"
+                android:layout_alignParentTop="false"
+                android:layout_toEndOf="@+id/review_comment_main_username"
+                android:layout_marginLeft="15dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="5dp"
+                android:layout_alignParentEnd="false" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Meh"
+                android:textColor="@color/secondary_color_darker"
+                android:textStyle="bold|italic"
+                android:id="@+id/review_comment_rating_text"
+                android:textSize="18sp"
+                android:singleLine="true"
+                android:paddingRight="0dp"
+                android:layout_alignParentTop="false"
+                android:layout_toEndOf="@+id/review_comment_time"
+                android:layout_marginStart="10dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="3dp"
+                android:layout_alignParentEnd="false" />
+
+        </RelativeLayout>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="190dp"
+            android:id="@+id/review_comment_image"
+            android:layout_gravity="center_horizontal"
+            android:scaleType="centerCrop"
+            android:background="#f6f6f6"
+            android:adjustViewBounds="true" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/review_comment_below_main">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="300dp"
+                android:layout_height="match_parent"
+                android:id="@+id/review_comment_main_text_area"
+                android:paddingLeft="5dp"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="commment"
+                    android:textColor="@color/secondary_text_color"
+                    android:id="@+id/review_comment_main_text"
+                    android:layout_marginLeft="5dp"
+                    android:textSize="17sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:minHeight="150dp"
+                android:id="@+id/review_comment_vote"
+                android:layout_gravity="center|top"
+                android:gravity="center_vertical|center_horizontal"
+                android:measureWithLargestChild="true"
+                >
+
+                <ImageButton
+                    android:layout_width="35dp"
+                    android:layout_height="25dp"
+                    android:id="@+id/review_comment_vote_upvote"
+                    android:background="@drawable/comment_upvote_button"/>
+
+                <Space
+                    android:layout_width="20px"
+                    android:layout_height="10dp" />
+
+                <ImageButton
+                    android:layout_width="35dp"
+                    android:layout_height="25dp"
+                    android:id="@+id/review_comment_vote_downvote"
+                    android:background="@drawable/comment_downvote_button"/>
+
+                <Space
+                    android:layout_width="20px"
+                    android:layout_height="10dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/fud_post_vote_area_color"
+                    android:text="00"
+                    android:id="@+id/review_comment_vote_netvote"
+                    android:layout_gravity="center"
+                    android:textSize="25sp"
+                    android:gravity="center_vertical|center_horizontal" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
