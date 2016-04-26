@@ -1,8 +1,14 @@
 package com.fudi.fudi.back;
 
 import android.os.AsyncTask;
+
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class is used to pull or push data from the Database. It uses "describers" and the MethodCalled
@@ -49,8 +55,15 @@ public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
     private Request request;
     private TreeMap<String, Object> describers;
     private boolean result;
+
     //TODO: add any variables you need
 
+    // Reference to the root of the database.
+    private Firebase ref;
+
+    // This will be used to ensure that we do complete the
+    // AsyncTask until the write is finished.
+    private final AtomicBoolean done = new AtomicBoolean(false);
 
     public DatabaseInteractor(MethodCalled method, Request request){
         this.method = method;
@@ -58,6 +71,9 @@ public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
         describers = new TreeMap<String, Object>();
 
         //TODO: set any variables you need
+        ref = new Firebase("https://fudi.firebaseio.com");
+        result = false;
+
     }
 
     public DatabaseInteractor(DatabaseInteractor di){
@@ -174,4 +190,143 @@ public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
     protected boolean getResult(){
         return result;
     }
+
+    /**
+     * Push Methods : Methods called in the push() function to place data on the Database.
+     * All push calls will overwrite any data already on the database. (i.e., they update
+     * existing information instead of duplicating it).
+     */
+
+
+    // PushMethodCalled.USER_PUSH
+    private boolean pushUser(){
+
+        //Make sure done and isSuccess are set to false.
+        done.set(false);
+        result = false;
+
+        // Grab the user from the describes map and grab the reference
+        // to the part of the database where we want to save the data.
+        User user = (User) describers.get("user");
+        Firebase userRef = ref.child("users").child(user.getUserID());
+
+        // Cycle through the information the User has
+        // and place any information in the Map that will be
+        // placed on the database.
+        Map<String, String> userValues = new HashMap<String, String>();
+
+        if(user.getPhoneNumber() != null){
+            userValues.put("phoneNumber", user.getPhoneNumber());
+        }
+
+        if(user.getUsername() != user.UNREGISTERED){
+            userValues.put("username", user.getUsername());
+        }
+
+        if(user.getUserID() != null){
+            userValues.put("userID", user.getUserID());
+        }
+
+        if(user.getDateJoined() != null){
+            userValues.put("dateJoined", user.getDateJoined().toString());
+        }
+
+        if(userValues.size() != 0) {
+
+            userRef.setValue(userValues, new Firebase.CompletionListener() {
+
+                @Override
+                public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                    if (firebaseError == null) {
+                        result = true;
+                    } else {
+                        result = false;
+                    }
+                    done.set(true);
+                }
+            });
+
+            // Busy wait in the Async Task until the
+            // write call is done.
+            while (!done.get()) ;
+
+        }
+
+        // Reset done to false so that it can be used again.
+        done.set(false);
+        return result;
+    }
+
+
+    //PushMethodCalled.COMMENTSECTION_PUSH_COMMENT;
+    private boolean pushCSComment(){
+
+        //Make sure done and isSuccess set to false
+        done.set(false);
+        result = false;
+
+        // Grab the comment and its parent.
+        Comment comment = (Comment) describers.get("comment");
+        CommentSection parent = comment.getParent();
+
+        // All comments will be pushed to the same place.
+        // They will be uniquely identified on the server.
+        // Firebase API will handle the unique identification.
+        Firebase commentsDataRef = ref.child("comments");
+
+        Map<String, Object> commentInfo = new HashMap<String, Object>();
+
+        if(parent != null){
+            commentInfo.put("commentSection", parent.getCommentSectionID());
+        }
+
+        if(comment != null){
+            commentInfo.put("text", comment.getText());
+            commentInfo.put("poster", comment.getWhoPosted());
+            commentInfo.put("upvotes", comment.getVote().getUpvotes());
+            commentInfo.put("downvotes", comment.getVote().getDownvotes());
+            commentInfo.put("date", comment.getTimestamp().toString());
+        }
+
+
+        // Get a Unique ID for this comment in the comments dataset.
+        Firebase commentRef = commentsDataRef.push();
+
+        commentRef.setValue(commentInfo, new Firebase.CompletionListener(){
+
+            @Override
+            public void onComplete(FirebaseError firebaseError, Firebase firebase){
+                if(firebaseError == null){
+                    result = true;
+                } else {
+                    result = false;
+                }
+                done.set(true);
+            }
+        });
+
+        while(!done.get());
+
+        done.set(false);
+        return result;
+    }
+
+//    //PushMethodCalled.COMMENTSECTION_PUSH
+//    private boolean pushCommentSection(){
+//
+//        //Set booleans to false
+//        done.set(false);
+//        result = false;
+//
+//        // Grab CommentSection we will be pushing
+//        CommentSection commentSection = (CommentSection) describers.get("commentSection");
+//
+//
+//    }
+
+
+
+    /**
+     * Pull Methods : Methods called in the pull() function to retreive data from the Database.
+     */
 }
