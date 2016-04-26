@@ -15,6 +15,9 @@ public class ReviewComment extends Comment {
 
     public static final Rating OKAY = Rating.OKAY;
 
+    public ReviewComment(){
+        super();
+    }
 
     public ReviewComment(String text, String proofImageURL, Rating rating,
                          User whoPosted, CommentSection parent){

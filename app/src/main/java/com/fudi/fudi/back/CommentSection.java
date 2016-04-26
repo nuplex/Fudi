@@ -12,10 +12,10 @@ public class CommentSection {
 
     private FudDetail parentFud;
     private TreeSet<Comment> comments; //ordered by first -> last
-    private String commentSectionID;
+    private final String commentSectionID;
 
     private static final String PREFIX = "CS";
-    private CommentSection(){}
+    public CommentSection(){commentSectionID = generateID();}
 
     public CommentSection(FudDetail parent){
         this.parentFud = parent;
@@ -101,6 +101,7 @@ public class CommentSection {
     public String getCommentSectionID() {
         return commentSectionID;
     }
+
 
     @Override
     public boolean equals(Object o){

@@ -17,6 +17,8 @@ public abstract class Comment implements Comparable<Comment>, Voteable {
     private Date timestamp;
     private Vote vote;
 
+    public Comment(){}
+
     protected Comment(String text, User whoPosted, CommentSection parent){
         this.text = text;
         this.whoPosted = whoPosted;

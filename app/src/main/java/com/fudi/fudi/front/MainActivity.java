@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.Space;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
 import com.fudi.fudi.R;
 import com.fudi.fudi.back.Fud;
 import com.fudi.fudi.back.FudDetail;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         fudList = (LinearLayout) findViewById(R.id.main_fud_list);
         fudViews = new TreeSet<FudView>();
+        Firebase.setAndroidContext(getApplicationContext());
 
         //set button onClickListener
         ImageButton newFudButton = (ImageButton) findViewById(R.id.main_new_fud_button);

@@ -15,11 +15,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * enum to determine how it handles various pull requests. Describers can be thought of as the
  * method parameters and return object references.
  *
- * Database Info:
- * //TODO: Enter info here for connecting
  * Created by chijioke on 4/20/16.
  */
 public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
+
+    private static final String SERVER_LOCATION = "https://fudiapp.firebaseio.com";
+    private static final String USERS = "users";
+    private static final String FUDDETAILS = "fuddetails";
+    private static final int TIMEOUT = 15000;
 
     /**
      * Designates the method that was called since many methods pull and push data from the database.
@@ -35,7 +38,7 @@ public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
 
         COMMENTSECTION_PULL_COMMENTS,
 
-        USER_PULL, USER_PULL_COMMENTS, USER_PULL_FUDS, USER_IS_REGISTERED, USER_IS_VERIFIED,
+        USER_PULL, USER_PULL_COMMENTS, USER_PULL_FUDS,
 
         GEOAREA_GET_GEO_AREA
     }
@@ -46,7 +49,7 @@ public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
         COMMENTSECTION_PUSH, COMMENTSECTION_PUSH_COMMENT, COMMENTSECTION_PUSH_COMMENTS,
         COMMENTSECTION_DELETE,
 
-        USER_PUSH, USER_PUSH_COMMENT, USER_PUSH_FUD, USER_UPDATE_FU
+        USER_PUSH, USER_UPDATE_FU
     }
 
     private enum Request{PUSH,PULL}
@@ -59,7 +62,7 @@ public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
     //TODO: add any variables you need
 
     // Reference to the root of the database.
-    private Firebase ref;
+    private Firebase firebase;
 
     // This will be used to ensure that we do complete the
     // AsyncTask until the write is finished.
@@ -71,7 +74,7 @@ public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
         describers = new TreeMap<String, Object>();
 
         //TODO: set any variables you need
-        ref = new Firebase("https://fudi.firebaseio.com");
+        firebase = new Firebase(SERVER_LOCATION);
         result = false;
 
     }
@@ -80,6 +83,8 @@ public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
         this.method = di.method;
         this.request = di.request;
         describers = new TreeMap<String, Object>(describers);
+        firebase = new Firebase(SERVER_LOCATION);
+        result = false;
     }
 
     /**
@@ -208,95 +213,10 @@ public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
         // Grab the user from the describes map and grab the reference
         // to the part of the database where we want to save the data.
         User user = (User) describers.get("user");
-        Firebase userRef = ref.child("users").child(user.getUserID());
-
-        // Cycle through the information the User has
-        // and place any information in the Map that will be
-        // placed on the database.
-        Map<String, String> userValues = new HashMap<String, String>();
-
-        if(user.getPhoneNumber() != null){
-            userValues.put("phoneNumber", user.getPhoneNumber());
-        }
-
-        if(user.getUsername() != user.UNREGISTERED){
-            userValues.put("username", user.getUsername());
-        }
-
-        if(user.getUserID() != null){
-            userValues.put("userID", user.getUserID());
-        }
-
-        if(user.getDateJoined() != null){
-            userValues.put("dateJoined", user.getDateJoined().toString());
-        }
-
-        if(userValues.size() != 0) {
-
-            userRef.setValue(userValues, new Firebase.CompletionListener() {
-
-                @Override
-                public void onComplete(FirebaseError firebaseError, Firebase firebase) {
-                    if (firebaseError == null) {
-                        result = true;
-                    } else {
-                        result = false;
-                    }
-                    done.set(true);
-                }
-            });
-
-            // Busy wait in the Async Task until the
-            // write call is done.
-            while (!done.get()) ;
-
-        }
-
-        // Reset done to false so that it can be used again.
-        done.set(false);
-        return result;
-    }
-
-
-    //PushMethodCalled.COMMENTSECTION_PUSH_COMMENT;
-    private boolean pushCSComment(){
-
-        //Make sure done and isSuccess set to false
-        done.set(false);
-        result = false;
-
-        // Grab the comment and its parent.
-        Comment comment = (Comment) describers.get("comment");
-        CommentSection parent = comment.getParent();
-
-        // All comments will be pushed to the same place.
-        // They will be uniquely identified on the server.
-        // Firebase API will handle the unique identification.
-        Firebase commentsDataRef = ref.child("comments");
-
-        Map<String, Object> commentInfo = new HashMap<String, Object>();
-
-        if(parent != null){
-            commentInfo.put("commentSection", parent.getCommentSectionID());
-        }
-
-        if(comment != null){
-            commentInfo.put("text", comment.getText());
-            commentInfo.put("poster", comment.getWhoPosted());
-            commentInfo.put("upvotes", comment.getVote().getUpvotes());
-            commentInfo.put("downvotes", comment.getVote().getDownvotes());
-            commentInfo.put("date", comment.getTimestamp().toString());
-        }
-
-
-        // Get a Unique ID for this comment in the comments dataset.
-        Firebase commentRef = commentsDataRef.push();
-
-        commentRef.setValue(commentInfo, new Firebase.CompletionListener(){
-
+        firebase.child(USERS).child(user.getUserID()).setValue(user, new Firebase.CompletionListener() {
             @Override
-            public void onComplete(FirebaseError firebaseError, Firebase firebase){
-                if(firebaseError == null){
+            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                if (firebaseError == null) {
                     result = true;
                 } else {
                     result = false;
@@ -305,28 +225,51 @@ public class DatabaseInteractor extends AsyncTask<Void, Void, Boolean>{
             }
         });
 
-        while(!done.get());
+        busyWaitOrTimeout(done);
 
+
+        // Reset done to false so that it can be used again.
         done.set(false);
         return result;
     }
 
-//    //PushMethodCalled.COMMENTSECTION_PUSH
-//    private boolean pushCommentSection(){
-//
-//        //Set booleans to false
-//        done.set(false);
-//        result = false;
-//
-//        // Grab CommentSection we will be pushing
-//        CommentSection commentSection = (CommentSection) describers.get("commentSection");
-//
-//
-//    }
 
+    //PushMethodCalled.COMMENTSECTION_PUSH_COMMENT;
+    private boolean commentSectionPushComment(){
+
+        //Make sure done
+
+        return result;
+    }
 
 
     /**
      * Pull Methods : Methods called in the pull() function to retreive data from the Database.
      */
+
+    /**
+     * Busy waits the async task for something to finish.
+     * @param done
+     * @return whether exited naturally (true) or timed out/an error occured (false)
+     */
+    private boolean busyWaitOrTimeout(AtomicBoolean done){
+        int waitTime = 100;
+        int waited = 0;
+        while(!done.get()){
+            if(waited >= TIMEOUT){
+                return false;
+            }
+
+            synchronized (this) {
+                try {
+                    this.wait(waitTime);
+                } catch (InterruptedException e){
+                    return false;
+                }
+            }
+            waited += waitTime;
+
+        }
+        return true;
+    }
 }

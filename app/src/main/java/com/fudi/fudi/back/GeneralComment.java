@@ -9,6 +9,8 @@ package com.fudi.fudi.back;
  */
 public class GeneralComment extends Comment {
 
+    public GeneralComment(){}
+
     public GeneralComment(String text, User whoPosted, CommentSection parent){
         super(text, whoPosted, parent);
     }

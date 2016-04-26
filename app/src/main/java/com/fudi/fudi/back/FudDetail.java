@@ -49,6 +49,8 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
 
     private static final String PREFIX = "FD";
 
+    public FudDetail(){fudID = genarateID();}
+
     public FudDetail(String imageURL, String dishName, String restaurant, String cost,
                      String description, User whoPosted, String... tags){
         fudID = genarateID();
@@ -189,6 +191,8 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
     public Date getTimestamp() {
         return timestamp;
     }
+
+
 
     @Override
     public boolean equals(Object o){
