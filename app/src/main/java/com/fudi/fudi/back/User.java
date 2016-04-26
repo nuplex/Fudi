@@ -42,12 +42,11 @@ public class User {
     private Date dateJoined;
     private Date dateRegistered;
     private Date dateVerified;
-    private boolean databaseVerifiedRegistered;
-    private boolean databaseVerifiedVerified;
+    private boolean isInDatabase;
     public static final String UNREGISTERED = "_unregistered";
     private static final String PREFIX = "U";
 
-    private User(){ userID = ""; throw new UnsupportedOperationException();}
+    public User(){ userID = generateID();}
 
     /**
      * This constructor is for users who choose not to immediately register. All users must have
@@ -59,10 +58,10 @@ public class User {
         userID = generateID();
         username = UNREGISTERED;
         registered = false;
-        databaseVerifiedRegistered = false;
         verified = false;
         fu = 0;
         dateJoined = Calendar.getInstance().getTime();
+        isInDatabase = true;
     }
 
     /**
@@ -76,10 +75,10 @@ public class User {
         userID = generateID();
         this.username = username;
         registered = true;
-        databaseVerifiedRegistered = false;
         verified = false;
         fu = 0;
         dateJoined = Calendar.getInstance().getTime();
+        isInDatabase = true;
     }
 
     /**
@@ -101,27 +100,6 @@ public class User {
      */
     public void pull(){
         //TODO: pulls all variables from the database or this user
-    }
-
-    /**
-     * Pushes a comment (GeneralComment or ReviewComment) to the database for this user
-     * @param comm
-     */
-    public void pushComment(Comment comm){
-        //TODO: push the user's comment or review to the database
-        /*Note that a review should be stored slightly differently from a general comment.
-          They are both comments, however a review has more data associated with it.
-         */
-
-    }
-
-    /**
-     * Pushes a fud post to the database for this user
-     * @param fud
-     */
-    public void pushFud(FudDetail fud){
-        //TODO: push the user's fud post
-        //Note a Fud has various components that need to be pushed, like the source for the image
     }
 
     /**
@@ -162,25 +140,6 @@ public class User {
     }
 
     /**
-     * Packages an intent of this user's data.
-     * @return the intent containing data for this User
-     */
-    public static Intent pack(){
-        //TODO: may not be necessary to implement
-        return null;
-    }
-
-    /**
-     * Unpacks an intent that contained user information
-     * @param intent the Intent containing user information
-     * @return the reconstructed User
-     */
-    public static User unpack(Intent intent){
-        //TODO: may not be necessary to implement
-        return null;
-    }
-
-    /**
      * Updates fu locally and on the database for this User.
      * @param voteType
      */
@@ -199,20 +158,7 @@ public class User {
      * @return true if registered, false otherwise
      */
     public boolean isRegistered(){
-        if(!databaseVerifiedRegistered) {
-            boolean dbCheck = true;
-            //TODO must check database to ensure user is registered
-
-            //Once you check once that they are indeed registered, no need to check again
-            if(dbCheck) {
-                databaseVerifiedRegistered = true;
-            }
-            dateRegistered = Calendar.getInstance().getTime();
-            registered = true;
-
-            return dbCheck;
-        }
-        return true;
+        return isRegistered();
     }
 
     /**
@@ -220,22 +166,16 @@ public class User {
      * @return true if verified, false otherwise
      */
     public boolean isVerified() {
-        if (!databaseVerifiedVerified) {
-            boolean dbCheck = true; //false if database says
-            //TODO must check database to ensure user is verified
-
-            //Once you check once that they are indeed verified, no need to check again
-            if (dbCheck) {
-                databaseVerifiedVerified = true;
-            }
-            dateVerified = Calendar.getInstance().getTime();
-            verified = true;
-
-            return dbCheck;
-        }
-        return true;
+        return isVerified();
     }
 
+    public Date getDateRegistered() {
+        return dateRegistered;
+    }
+
+    public Date getDateVerified() {
+        return dateVerified;
+    }
 
     private String generateID(){
         /*TODO: Create a method for generating IDs, suggestion: use phoneNumber + someOtherStat.
@@ -266,6 +206,36 @@ public class User {
     public Date getDateJoined() {
         return dateJoined;
     }
+
+    public boolean isInDatabase() {
+        return isInDatabase;
+    }
+
+    public void setRegistered(boolean registered) {
+        this.registered = registered;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void setIsInDatabase(boolean isInDatabase) {
+        this.isInDatabase = isInDatabase;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setFu(int fu) {
+        this.fu = fu;
+    }
+
+
 
     @Override
     public boolean equals(Object o){
