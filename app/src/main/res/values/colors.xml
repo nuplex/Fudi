@@ -16,6 +16,8 @@
 
     <color name="standard_button_color">#FC7A5E</color>
     <color name="standard_button_pressed_color">#C9614B</color>
+    <color name="register_button_color">#74A6FF</color>
+    <color name="register_button_pressed">#003188</color>
 
     <color name="fud_post_vote_area_color">#F9C8C0</color>
     <color name="fud_post_dishtitle_color">#7A7A7A</color>

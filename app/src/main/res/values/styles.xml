@@ -11,4 +11,9 @@
         <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
 
+    <style name="AppTheme.Login" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
 </resources>

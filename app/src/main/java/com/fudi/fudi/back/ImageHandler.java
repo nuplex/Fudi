@@ -477,7 +477,7 @@ public class ImageHandler {
         public String generateID(){
             //TODO: implement a virutally collision free generation method
             //Should be 6 alphanumeric characters, DO NOT use the fuddetail, this is independent
-            return Long.toHexString((new Random()).nextLong() + 100000 % 1000000);
+            return FudiApp.generateID(20);
         }
     }
 

@@ -2,8 +2,12 @@ package com.fudi.fudi.back;
 
 import android.content.Intent;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Random;
 import java.util.TreeSet;
 
 /**
@@ -18,7 +22,8 @@ public class User {
      * are unique. Creating a hash from the user's phone number and some other data may be the
      * the easiest way. Note this can be a long or a String, dependent on how the ID is generated
      */
-    private final String userID;
+    private String userID;
+    private String firebaseID;
 
     private String username;
 
@@ -30,6 +35,7 @@ public class User {
     /**
      * If a user opts to fully registered. A registered user has a username.
      */
+    private boolean firstTime;
     private boolean registered;
     private boolean verified;
 
@@ -37,16 +43,21 @@ public class User {
      * A user's "fu" is equivalent to reddit Karam or YikYak yakarma.
      * It raises based on the user's own posts and comments and how much they get upvoted.
      */
-    private int fu;
+    private long fu;
 
     private Date dateJoined;
-    private Date dateRegistered;
-    private Date dateVerified;
-    private boolean isInDatabase;
     public static final String UNREGISTERED = "_unregistered";
     private static final String PREFIX = "U";
 
-    public User(){ userID = generateID();}
+    public User(){
+        this.phoneNumber = "";
+        username = UNREGISTERED;
+        registered = false;
+        verified = false;
+        fu = 0;
+        dateJoined = Calendar.getInstance().getTime();
+        firstTime = true;
+    }
 
     /**
      * This constructor is for users who choose not to immediately register. All users must have
@@ -61,7 +72,7 @@ public class User {
         verified = false;
         fu = 0;
         dateJoined = Calendar.getInstance().getTime();
-        isInDatabase = true;
+        firstTime = true;
     }
 
     /**
@@ -78,29 +89,9 @@ public class User {
         verified = false;
         fu = 0;
         dateJoined = Calendar.getInstance().getTime();
-        isInDatabase = true;
+        firstTime = true;
     }
 
-    /**
-     * Sends all changed user data to the database. If the user was just created, must add the user
-     * to the database
-     */
-    public void push(){
-        //TODO: push all non-constant variables to the database
-        /*if you want to be effecient, push only variables that have changed*/
-
-
-        //TODO: new user case
-        /*userId is final and cannot be changed, if this can be represented in the database, ensure
-        it is.*/
-    }
-
-    /**
-     * Pulls user data from database, updating the local user
-     */
-    public void pull(){
-        //TODO: pulls all variables from the database or this user
-    }
 
     /**
      * Pulls all comments for this user from the database.
@@ -153,12 +144,30 @@ public class User {
         //TODO update user's fu score in the database
     }
 
+    public static User firebaseToUser(HashMap<String, Object> hm){
+        String usnm =  (String) hm.get("username");
+        Boolean fstTime = (Boolean) hm.get("firstTime");
+        String pNum = (String) hm.get("phoneNumber");
+        Boolean vrfd = (Boolean) hm.get("verified");
+        Long fu = (Long) hm.get("fu");
+        Date dateJoined = new Date((Long) hm.get("dateJoined"));
+        User u = new User();
+        u.username = usnm;
+        u.firstTime = fstTime;
+        u.phoneNumber = pNum;
+        u.verified = vrfd;
+        u.fu = fu;
+        u.dateJoined = dateJoined;
+        u.userID = (String) hm.get("userID");
+        return u;
+    }
+
     /**
      * Checks the database to check if the user is registered.
      * @return true if registered, false otherwise
      */
     public boolean isRegistered(){
-        return isRegistered();
+        return registered;
     }
 
     /**
@@ -166,25 +175,15 @@ public class User {
      * @return true if verified, false otherwise
      */
     public boolean isVerified() {
-        return isVerified();
+        return verified;
     }
 
-    public Date getDateRegistered() {
-        return dateRegistered;
+    public static String generateID(){
+        return PREFIX+FudiApp.generateID(15);
     }
 
-    public Date getDateVerified() {
-        return dateVerified;
-    }
-
-    private String generateID(){
-        /*TODO: Create a method for generating IDs, suggestion: use phoneNumber + someOtherStat.
-            A good method would ensure no collisions happen between IDs, ever. A good ID is one
-            that is generated like a hash.
-            Should of course handle collisions.
-            TODO: IDs should be PREFIX + 10 characters, numerical and uppercase A-Z.
-         */
-        return PREFIX+"";
+    public boolean isFirstTime() {
+        return firstTime;
     }
 
     public String getUsername(){
@@ -195,7 +194,7 @@ public class User {
         return phoneNumber;
     }
 
-    public int getFu() {
+    public long getFu() {
         return fu;
     }
 
@@ -207,35 +206,37 @@ public class User {
         return dateJoined;
     }
 
-    public boolean isInDatabase() {
-        return isInDatabase;
+    public String getFirebaseID() {
+        return firebaseID;
     }
 
-    public void setRegistered(boolean registered) {
-        this.registered = registered;
+    //Returns a user with just a userID and username;
+    public static User getStandInUser(String userID, String username){
+        User standIn = new User();
+        standIn.setUsername(username);
+        standIn.setUserID(userID);
+        return standIn;
     }
 
-    public void setVerified(boolean verified) {
-        this.verified = verified;
+    public void setUserID(String userID) {
+        this.userID = userID;
     }
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
-    public void setIsInDatabase(boolean isInDatabase) {
-        this.isInDatabase = isInDatabase;
-    }
-
     public void setUsername(String username) {
         this.username = username;
     }
 
-    public void setFu(int fu) {
-        this.fu = fu;
+    public void setFirstTime(boolean firstTime) {
+        this.firstTime = firstTime;
     }
 
-
+    public void setFirebaseID(String firebaseID) {
+        this.firebaseID = firebaseID;
+    }
 
     @Override
     public boolean equals(Object o){

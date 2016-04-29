@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,6 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
 import com.fudi.fudi.R;
 import com.fudi.fudi.back.Comment;
 import com.fudi.fudi.front.FudCreationActivity;
@@ -62,6 +64,9 @@ public class FudDetailActivity extends AppCompatActivity {
 
     private FrameLayout popupChooser;
     private FrameLayout popupAddComment;
+    private FrameLayout popupProcessing;
+    private FrameLayout addReviewFrame;
+    private FrameLayout addCommentFrame;
     private ImageView reviewCommentImage;
 
     private boolean loadingAgain = false;
@@ -73,11 +78,17 @@ public class FudDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fud_detail);
+        Firebase.setAndroidContext(getApplicationContext());
 
         String fudID = getIntent().getStringExtra(Fud.EXTRA_TAG_ID);
 
         comments = new TreeSet<CommentView>();
-        fudDetail = TestDatabase.getInstance().getFudDetail(fudID);
+        for(FudDetail fd : FudiApp.getInstance().getCurrentlyDisplayedFudDetails()){
+            if(fd.getFudID().equals(fudID)){
+                fudDetail = fd;
+                break;
+            }
+        }
         /**
          * TODO: replace with that line when database is working
          *
@@ -108,14 +119,17 @@ public class FudDetailActivity extends AppCompatActivity {
         text.setText(fudDetail.getDescription());
 
         TextView netVote = (TextView)  findViewById(R.id.fud_detail_netvote);
-        netVote.setText(Integer.toString(vote.getNet()));
+        netVote.setText(Long.toString(vote.getNet()));
 
         //Set button actions
         ImageButton upvoteButton = (ImageButton) findViewById(R.id.fud_detail_upvote_button);
-        upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, netVote, oneVotePressed));
-
         ImageButton downvoteButton = (ImageButton) findViewById(R.id.fud_detail_downvote_button);
-        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU, netVote, oneVotePressed));
+
+        upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
+                netVote, oneVotePressed));
+
+        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU, upvoteButton,
+                netVote, oneVotePressed));
 
         //Load in the image
         ImageView image = (ImageView) findViewById(R.id.fud_detail_dish);
@@ -123,7 +137,10 @@ public class FudDetailActivity extends AppCompatActivity {
 
         //Comment Handling
         commentList = (LinearLayout) findViewById(R.id.fud_detail_comment_section);
+
+
         pull();
+
 
         //Comment Button Handling
         ImageButton addCommentButton = (ImageButton) findViewById(R.id.fudi_detail_add_comment_button);
@@ -186,6 +203,26 @@ public class FudDetailActivity extends AppCompatActivity {
         System.gc();
     }
 
+    public boolean networkCheck(){
+        if(!FudiApp.hasNetworkConnection()){
+            commentList.removeAllViews();
+            LinearLayout noNetwork = (LinearLayout)
+                    getLayoutInflater().inflate(R.layout.no_network, null);
+            noNetwork.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(networkCheck()){
+                        pull();
+                    }
+                }
+            });
+            commentList.addView(noNetwork);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     private void pull(){
         convertAll(fudDetail.getCommentSection().getComments());
         constructCommentSection();
@@ -221,6 +258,12 @@ public class FudDetailActivity extends AppCompatActivity {
 
     private void updateCommentSection(){
         commentList.removeAllViews();
+        CommentSection cs = fudDetail.getCommentSection();
+        if(cs == null){
+            Log.e("ERROR", "Comment section for " + fudDetail.getFudID() + " was null");
+            cs = new CommentSection();
+        }
+        convertAll(cs.getComments());
         constructCommentSection();
     }
 
@@ -310,7 +353,7 @@ public class FudDetailActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
-                    final FrameLayout addReviewFrame = (FrameLayout)
+                    addReviewFrame = (FrameLayout)
                             getLayoutInflater().inflate(R.layout.add_review_comment_popup, null);
                     mainframe.addView(addReviewFrame);
                     mainframe.removeView(popupChooser);
@@ -331,6 +374,7 @@ public class FudDetailActivity extends AppCompatActivity {
                     cancel.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            FudiApp.hideSoftKeyboard(FudDetailActivity.this);
                             addReviewFrame.setVisibility(View.GONE);
                             mainframe.removeView(addReviewFrame);
                             popupAddComment = null;
@@ -343,53 +387,7 @@ public class FudDetailActivity extends AppCompatActivity {
                     take.setOnClickListener(new LoadPicOnClickListener());
 
                     ImageButton submit = (ImageButton) addReviewFrame.findViewById(R.id.review_comment_popup_submit);
-                    submit.setOnClickListener(new OnClickListener(){
-                        @Override
-                        public void onClick(View v) {
-                            if(emmtw.isGood()){
-                                if(!imageSet){
-                                    Toast.makeText(FudDetailActivity.this, "What about the image!?",
-                                            Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                //submit it to the server
-                                //just doing locally for now
-
-                                String text = edit.getText().toString();
-                                //Get popup for loading
-                                FrameLayout popup =
-                                        (FrameLayout) getLayoutInflater().inflate(R.layout.processing_popup,null);
-                                mainframe.addView(popup);
-                                //First, upload the image to the image server
-                                ImageHandler.UploadImageTask uit =
-                                        ImageHandler.getInstance().uploadImageToDatabase(
-                                        FudDetailActivity.this, image);
-                                while(uit.getStatus() != AsyncTask.Status.FINISHED){
-                                }
-                                String imageURL = uit.getURLUploadedTo();
-                                if(imageURL == null){
-                                    submitFail();
-                                }
-
-                                ReviewComment review = new ReviewComment(text,imageURL,
-                                        ReviewComment.Rating.GREAT, FudiApp.getInstance().getThisUser(),
-                                        fudDetail.getCommentSection());
-                                add(new ReviewCommentView(FudDetailActivity.this, review));
-                                fudDetail.getCommentSection().postComment(review);
-
-                                mainframe.removeView(popup);
-                                addReviewFrame.setVisibility(View.GONE);
-                                mainframe.removeView(addReviewFrame);
-
-
-                                /*TODO just do CommentSection.pushComment(the comment) when db works
-                                 */
-                            } else {
-                                Toast.makeText(FudDetailActivity.this, "You forgot the review!",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
+                    submit.setOnClickListener(new SubmitReviewOnClick(emmtw, edit, image));
                 }
             });
             reviewButton.setEnabled(false); //TODO fix this
@@ -401,7 +399,7 @@ public class FudDetailActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
-                    final FrameLayout addCommentFrame = (FrameLayout)
+                    addCommentFrame = (FrameLayout)
                             getLayoutInflater().inflate(R.layout.add_comment_popup, null);
                     mainframe.addView(addCommentFrame);
                     mainframe.removeView(popupChooser);
@@ -418,9 +416,11 @@ public class FudDetailActivity extends AppCompatActivity {
                     cancel.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            FudiApp.hideSoftKeyboard(FudDetailActivity.this);
                             addCommentFrame.setVisibility(View.GONE);
                             mainframe.removeView(addCommentFrame);
                             popupAddComment = null;
+                            addCommentFrame = null;
                         }
                     });
 
@@ -429,24 +429,41 @@ public class FudDetailActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             if(emmtw.isGood()){
-                                //submit it to the server
-                                //just doing locally for now
-
+                                FudiApp.hideSoftKeyboard(FudDetailActivity.this);
                                 String text = edit.getText().toString();
                                 //Get popup for loading
-                                FrameLayout popup =
-                                        (FrameLayout) getLayoutInflater().inflate(R.layout.processing_popup,null);
-                                mainframe.addView(popup);
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        popupProcessing =
+                                                (FrameLayout) getLayoutInflater().inflate(R.layout.processing_popup, null);
+                                        mainframe.addView(popupProcessing);
+                                    }
+                                });
 
-                                GeneralComment comment = new GeneralComment(text,
+                                final GeneralComment comment = new GeneralComment(text,
                                         FudiApp.getInstance().getThisUser(),
                                         fudDetail.getCommentSection());
                                 add(new CommentView(FudDetailActivity.this, comment));
-                                fudDetail.getCommentSection().postComment(comment);
+                                (new AsyncTask<Void, Void, Void>() {
+                                    @Override
+                                    protected Void doInBackground(Void... params) {
+                                        FudiApp.getInstance().pushCommentForFudDetail(fudDetail.getFudID(),comment);
+                                        return null;
+                                    }
 
-                                mainframe.removeView(popup);
-                                addCommentFrame.setVisibility(View.GONE);
-                                mainframe.removeView(addCommentFrame);
+                                }).execute();
+
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mainframe.removeView(popupProcessing);
+                                        addCommentFrame.setVisibility(View.GONE);
+                                        mainframe.removeView(addCommentFrame);
+                                        addCommentFrame = null;
+                                        popupProcessing = null;
+                                    }
+                                });
 
                                 /*TODO just do CommentSection.pushComment(the comment) when db works
                                  */
@@ -466,6 +483,7 @@ public class FudDetailActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
+            FudiApp.hideSoftKeyboard(FudDetailActivity.this);
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             boolean fail = false;
             if (intent.resolveActivity(getPackageManager()) != null) {
@@ -505,6 +523,7 @@ public class FudDetailActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
+            FudiApp.hideSoftKeyboard(FudDetailActivity.this);
             if(!loadingAgain){
                 loadingAgain = true;
             } else {
@@ -518,4 +537,113 @@ public class FudDetailActivity extends AppCompatActivity {
 
         }
     }
+
+    private class SubmitReviewOnClick implements View.OnClickListener{
+
+        private MinMaxTextWatcher<EditText> emmtw;
+        private EditText edit;
+        private ImageView image;
+
+        public SubmitReviewOnClick(MinMaxTextWatcher<EditText> mmtw, EditText editText,
+                                   ImageView image){
+            emmtw = mmtw;
+            edit = editText;
+            this.image = image;
+        }
+
+        @Override
+        public void onClick(View v) {
+            FudiApp.hideSoftKeyboard(FudDetailActivity.this);
+            if(emmtw.isGood()) {
+                if (!imageSet) {
+                    Toast.makeText(FudDetailActivity.this, "What about the image!?",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        popupProcessing =
+                                (FrameLayout) getLayoutInflater().inflate(R.layout.processing_popup, null);
+                        mainframe.addView(popupProcessing);
+                        //First, upload the image to the image server
+
+                    }
+                });
+
+                (new AsyncTask<Void, Void, String>() {
+
+                    private ImageHandler.UploadImageTask uit;
+
+                    @Override
+                    protected void onPreExecute() {
+                        uit = ImageHandler.getInstance().uploadImageToDatabase(
+                                FudDetailActivity.this, image);
+                    }
+
+                    @Override
+                    protected String doInBackground(Void... params) {
+                        while (uit == null) {
+                            publishProgress();
+                            try {
+                                synchronized (this) {
+                                    this.wait(10);
+                                }
+                            } catch (InterruptedException e) {
+                                return null;
+                            }
+                        }
+
+                        while (uit.getURLUploadedTo() == null) {
+                            if (uit.isCancelled()) {
+                                submitFail();
+                            }
+                            publishProgress();
+                            try {
+                                synchronized (this) {
+                                    this.wait(300);
+                                }
+                            } catch (InterruptedException e) {
+                                return null;
+                            }
+                        }
+
+                        String imageURL = uit.getURLUploadedTo();
+                        return imageURL;
+                    }
+
+                    @Override
+                    protected void onProgressUpdate(Void... values) {
+                        super.onProgressUpdate(values);
+                    }
+
+                    @Override
+                    protected void onPostExecute(String s) {
+                        String imageURL = uit.getURLUploadedTo();
+                        if (imageURL == null) {
+                            submitFail();
+                        }
+                        ReviewComment review = new ReviewComment(edit.getText().toString(),
+                                imageURL,
+                                ReviewComment.Rating.GREAT, FudiApp.getInstance().getThisUser(),
+                                fudDetail.getCommentSection());
+                        add(new ReviewCommentView(FudDetailActivity.this, review));
+                        FudiApp.getInstance().pushCommentForFudDetail(fudDetail.getFudID(), review);
+
+                        mainframe.removeView(popupProcessing);
+                        addReviewFrame.setVisibility(View.GONE);
+                        mainframe.removeView(addReviewFrame);
+                        popupProcessing = null;
+                        addReviewFrame = null;
+                    }
+
+                }).execute();
+
+            }else {
+                    Toast.makeText(FudDetailActivity.this, "You forgot the review!",
+                            Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 }

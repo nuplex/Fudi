@@ -33,6 +33,8 @@ public class FudView extends View implements Comparable<FudView> {
     private Vote vote;
     private boolean oneVotePressed;
     private Context context;
+    private ImageView image;
+    private boolean imageLoaded;
 
     public FudView(Context context, Fud fud) {
         super(context);
@@ -71,11 +73,10 @@ public class FudView extends View implements Comparable<FudView> {
 
         FudOnClickListener focl = new FudOnClickListener();
 
-        //Set visible elements
-        ImageView image = (ImageView) fudView.findViewById(R.id.fud_post_image);
+        imageLoaded = false;
 
-        //TODO image needs to be dynamically loaded to conserve memory
-        ImageHandler.getInstance().loadImageIntoImageView(context, image, fud.getImageURL());
+        //Set visible elements
+        image = (ImageView) fudView.findViewById(R.id.fud_post_image);
 
         TextView dishTitle = (TextView) fudView.findViewById(R.id.fud_post_dishtitle);
         dishTitle.setText(fud.getDishName());
@@ -84,7 +85,7 @@ public class FudView extends View implements Comparable<FudView> {
         restaurant.setText(fud.getRestaurant());
 
         TextView netVote = (TextView) fudView.findViewById(R.id.fud_post_netvote_text);
-        netVote.setText(Integer.toString(vote.getNet()));
+        netVote.setText(Long.toString(vote.getNet()));
 
         TextView time = (TextView) fudView.findViewById(R.id.fud_post_time);
         time.setText(fud.getTimeSincePostedString());
@@ -94,10 +95,13 @@ public class FudView extends View implements Comparable<FudView> {
 
         //Set button actions
         ImageButton upvoteButton = (ImageButton) fudView.findViewById(R.id.fud_post_upvote_button);
-        upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, netVote, oneVotePressed));
-
         ImageButton downvoteButton = (ImageButton) fudView.findViewById(R.id.fud_post_downvote_button);
-        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU, netVote, oneVotePressed));
+
+        upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
+                netVote, oneVotePressed));
+
+        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU, upvoteButton,
+                netVote, oneVotePressed));
 
         //Set comment button
         Button commentButton = (Button) fudView.findViewById(R.id.fud_post_comment_button);
@@ -111,6 +115,21 @@ public class FudView extends View implements Comparable<FudView> {
 
     public Fud getFud(){
         return fud;
+    }
+
+    public void loadImage(){
+        ImageHandler.getInstance().loadImageIntoImageView(context, image, fud.getImageURL());
+        imageLoaded = true;
+    }
+
+    public void unloadImage(){
+        image.setImageDrawable(null);
+        System.gc();
+        imageLoaded = false;
+    }
+
+    public boolean imageIsLoaded(){
+        return imageLoaded;
     }
 
     @Override

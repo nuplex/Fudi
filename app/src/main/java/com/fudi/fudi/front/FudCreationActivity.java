@@ -34,6 +34,7 @@ import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
 import com.fudi.fudi.R;
 import com.fudi.fudi.back.Fud;
 import com.fudi.fudi.back.FudDetail;
@@ -84,6 +85,8 @@ public class FudCreationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fud_creation);
+        Firebase.setAndroidContext(getApplicationContext());
+
 
         flexSpaceShrunkAndMainShown = false;
 
@@ -347,6 +350,7 @@ public class FudCreationActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
+            FudiApp.hideSoftKeyboard(FudCreationActivity.this);
             if(rmmtw.isGood() && dmmtw.isGood() && flexSpaceShrunkAndMainShown){
                 //Get popup for loading
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -354,11 +358,6 @@ public class FudCreationActivity extends AppCompatActivity {
                     public void run() {
                         FrameLayout popup = (FrameLayout) getLayoutInflater().inflate(R.layout.processing_popup, null);
                         frame.addView(popup);
-                        View v = getCurrentFocus();
-                        if(v != null){
-                            v.clearFocus();
-                        }
-
                         progress = (TextView) popup.findViewById(R.id.processing_popup_text);
                     }
                 });
@@ -405,7 +404,7 @@ public class FudCreationActivity extends AppCompatActivity {
                             publishProgress();
                             try {
                                 synchronized (this) {
-                                    this.wait(300);
+                                    this.wait(100);
                                 }
                             } catch (InterruptedException e) {
                                 return null;
@@ -420,7 +419,7 @@ public class FudCreationActivity extends AppCompatActivity {
                         @Override
                     protected void onProgressUpdate(Void... values) {
                         /*TODO, make a ProgressView class and make this a method...*/
-                        String[] toWrite = {"F", "U", "D", "I", "\uD83C\uDF5C"};
+                        String[] toWrite = {"\uD83C\uDF5C"};
                         progress.setText(toWrite[which]);
                         which = ((which + 1) % toWrite.length);
                     }
@@ -432,7 +431,7 @@ public class FudCreationActivity extends AppCompatActivity {
                             endFail();
                         }
 
-                        FudDetail fudDetail = new FudDetail(imageURL, dishName, restName, costText,
+                       final FudDetail fudDetail = new FudDetail(imageURL, dishName, restName, costText,
                                 descText, FudiApp.getInstance().getThisUser(), "");
 
                         //Upload the FudDetail to the database
@@ -446,6 +445,14 @@ public class FudCreationActivity extends AppCompatActivity {
                          *
                          */
 
+                        (new AsyncTask<Void,Void,Void>(){
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                FudiApp.getInstance().pushFudDetail(fudDetail);
+                                return null;
+                            }
+
+                        }).execute();
                         TestDatabase.getInstance().put(fudDetail.getFudID(), fudDetail);
 
                         setResult(MainActivity.RESULT_OK);
