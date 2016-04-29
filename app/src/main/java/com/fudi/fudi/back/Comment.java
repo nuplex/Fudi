@@ -3,6 +3,8 @@ package com.fudi.fudi.back;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.TreeMap;
 
 /**
  * Represents a comment on a FudDetail, of which there can be two types: GeneralComment and ReviewComment.
@@ -16,6 +18,8 @@ public abstract class Comment implements Comparable<Comment>, Voteable {
     private CommentSection parent;
     private Date timestamp;
     private Vote vote;
+
+    public Comment(){}
 
     protected Comment(String text, User whoPosted, CommentSection parent){
         this.text = text;
@@ -31,6 +35,10 @@ public abstract class Comment implements Comparable<Comment>, Voteable {
 
     public User getWhoPosted() {
         return whoPosted;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     public CommentSection getParent() {
@@ -70,4 +78,29 @@ public abstract class Comment implements Comparable<Comment>, Voteable {
             return lhs.timestamp.compareTo(rhs.timestamp);
         }
     }
+
+    public TreeMap<String, Object> toFirebase(){
+        String text = getText();
+        String userID = getWhoPosted().getUserID();
+        String type = (this instanceof ReviewComment) ? "review":"general";
+        String imageURL = (this instanceof ReviewComment) ? ((ReviewComment) this).getProofImageURL():"";
+        String rating = (this instanceof ReviewComment) ? ((ReviewComment) this).getRating().name() :"";
+        Long time = getTimestamp().getTime();
+        Vote v = getVote();
+
+        TreeMap<String, Object> info = new TreeMap<String, Object>();
+        info.put("text", text);
+        info.put("userID", userID);
+        info.put("username", whoPosted.getUsername());
+        info.put("type", type);
+        info.put("imageURL", imageURL);
+        info.put("rating",rating);
+        info.put("timestamp",time);
+        info.put("upvotes", v.getUpvotes());
+        info.put("downvotes", v.getDownvotes());
+        info.put("netvote", v.getNet());
+        return info;
+    }
+
+
 }

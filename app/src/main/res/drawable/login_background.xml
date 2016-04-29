@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient android:endColor="@color/fud_post_vote_area_color"
+                android:centerColor="@color/background_color"
+                android:startColor="@color/background_color"
+                android:type="linear"
+                android:angle="270"/>
+        </shape>
+    </item>
+</selector>

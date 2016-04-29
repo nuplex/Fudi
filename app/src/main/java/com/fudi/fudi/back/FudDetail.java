@@ -2,11 +2,16 @@ package com.fudi.fudi.back;
 
 import android.location.Location;
 import android.location.LocationManager;
+import android.util.Log;
+import android.widget.ArrayAdapter;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -20,7 +25,7 @@ import java.util.TreeSet;
  */
 public class FudDetail implements Comparable<FudDetail>, Voteable{
 
-    private final String fudID;
+    private String fudID;
 
     private String imageURL;
 
@@ -49,6 +54,8 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
 
     private static final String PREFIX = "FD";
 
+    public FudDetail(){fudID = genarateID();}
+
     public FudDetail(String imageURL, String dishName, String restaurant, String cost,
                      String description, User whoPosted, String... tags){
         fudID = genarateID();
@@ -62,6 +69,7 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
         timestamp = Calendar.getInstance().getTime();
         vote = new Vote(whoPosted.getUserID());
         locationPosted = new Location(LocationManager.NETWORK_PROVIDER);
+        locationOfRestaurant = new Location(LocationManager.NETWORK_PROVIDER);
         commentSection = new CommentSection(this);
     }
 
@@ -75,24 +83,6 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
                 commentSection.getCommentNumber(), timestamp);
     }
 
-    /**
-     * Pushes the FudDetail to the database, if it is new, it will store a new FudDetail on the
-     * database, otherwise it just updates the entry for this database.
-     */
-    public void push(){
-        //TODO: connect to the database and update any variables that have changed here
-        //Note: Should figure out how to properly represent a Vote and Location
-        //Suggestion: Vote, call vote.push();
-        //Suggestion: Location: store doubles lat and long
-    }
-
-    /**
-     * Pulls data from the database and updates the FudDetail locally
-     */
-    public void update(){
-        //TODO: connect to the database and pull down data for this FudDetail based on it's id
-
-    }
 
     /**
      * Add a comment to the CommentSection for the FudDetail
@@ -100,7 +90,6 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
      */
     public void addComment(Comment comment){
         commentSection.postComment(comment);
-        commentSection.pushComment(comment);
     }
 
 
@@ -133,9 +122,7 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
      * @return the generated ID
      */
     public String genarateID(){
-        //TODO: implement the real verison of this that is mostly collison free/handles collisions
-        long l = ((new Random()).nextLong() + 1000000000) % 10000000000L;
-        return PREFIX + l;
+        return PREFIX + FudiApp.generateID(25);
     }
 
     public String getFudID() {
@@ -188,6 +175,81 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
 
     public Date getTimestamp() {
         return timestamp;
+    }
+
+    public TreeMap<String, Object> toFirebase(){
+        TreeMap firebaseable = new TreeMap<String, Object>();
+        firebaseable.put("fudID", fudID);
+        firebaseable.put("imageURL", imageURL);
+        firebaseable.put("dishName",dishName);
+        firebaseable.put("restaurant",restaurant);
+        firebaseable.put("cost",cost);
+        firebaseable.put("description",description);
+        firebaseable.put("tags",tags);
+        firebaseable.put("whoPostedID", whoPosted.getUserID());
+        firebaseable.put("whoPostedName", whoPosted.getUsername());
+        firebaseable.put("upvotes", vote.getUpvotes());
+        firebaseable.put("downvotes", vote.getDownvotes());
+        firebaseable.put("netvote", vote.getNet());
+        firebaseable.put("comments", commentSection.getFirebaseableComments());
+        firebaseable.put("timestamp", timestamp);
+        firebaseable.put("restLocLat", locationPosted.getLatitude());
+        firebaseable.put("restLocLong", locationPosted.getLongitude());
+        firebaseable.put("postedLocLat", locationPosted.getLatitude());
+        firebaseable.put("postedLocLong", locationPosted.getLongitude());
+        return firebaseable;
+    }
+
+    public static FudDetail firebaseToFudDetail(HashMap<String, Object> hm){
+        FudDetail fd = new FudDetail();
+        String userID = (String) hm.get("whoPostedID");
+        fd.locationPosted = new Location(LocationManager.NETWORK_PROVIDER);
+        fd.locationOfRestaurant = new Location(LocationManager.NETWORK_PROVIDER);
+
+        Log.d("Contents", hm.toString());
+
+        fd.fudID = (String) hm.get("fudID");
+        fd.imageURL = (String) hm.get("imageURL");
+        fd.dishName = (String) hm.get("dishName");
+        fd.restaurant = (String) hm.get("restaurant");
+        fd.cost = (String) hm.get("cost");
+        fd.description = (String) hm.get("description");
+        fd.tags =  firebaseTagsToStrings(hm.get("tags"));
+        fd.whoPosted = User.getStandInUser(userID, (String) hm.get("whoPostedName"));
+        fd.vote = new Vote((long) hm.get("upvotes"), (long) hm.get("downvotes"), userID);
+        fd.commentSection = CommentSection.firebaseToCommentSection( (HashMap<String, Object>) hm.get("comments"));
+        fd.timestamp = new Date((long) hm.get("timestamp"));
+        fd.locationOfRestaurant.setLatitude((Double) hm.get("restLocLat"));
+        fd.locationOfRestaurant.setLongitude((Double) hm.get("restLocLong"));
+        fd.locationPosted.setLatitude((Double) hm.get("postedLocLat"));
+        fd.locationPosted.setLongitude((Double) hm.get("postedLocLong"));
+
+        return fd;
+    }
+
+    public Fud firebaseFudDetailToFud(HashMap<String, Object> hm){
+        return firebaseToFudDetail(hm).simplify();
+    }
+
+    private static String[] firebaseTagsToStrings(Object objs){
+        String[] s;
+        if(objs == null){
+            return new String[]{""};
+        }
+        if(objs instanceof ArrayList){
+            Object[] os = ((ArrayList<Object>) objs).toArray();
+            s = new String[os.length];
+            for(int i = 0; i < s.length; i++){
+                s[i] = (String) os[i];
+            }
+        } else {
+            s = new String[((Object[]) objs).length];
+            for(int i = 0; i < s.length; i++){
+                s[i] = (String) ((Object[]) objs)[i];
+            }
+        }
+
+        return s;
     }
 
     @Override

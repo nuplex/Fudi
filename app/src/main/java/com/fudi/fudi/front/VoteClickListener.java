@@ -16,12 +16,16 @@ public class VoteClickListener implements View.OnClickListener {
     private TextView voteText;
     private Vote vote;
     private boolean oneVotePressed;
+    private ImageButton otherVote;
 
-    public VoteClickListener(Vote vote, Vote.Type type, TextView voteText, Boolean ovp){
+    public VoteClickListener(Vote vote, Vote.Type type, ImageButton otherVote,
+                             TextView voteText, Boolean ovp){
         this.voteText = voteText;
         this.type = type;
         this.vote = vote;
         this.oneVotePressed = ovp;
+        this.otherVote = otherVote;
+
     }
 
     @Override
@@ -31,28 +35,20 @@ public class VoteClickListener implements View.OnClickListener {
             switch(type){
                 case UPFU:
                     vote.vote(Vote.Type.UPFU);
-                    voteText.setText(Integer.toString(vote.getNet()));
+                    voteText.setText(Long.toString(vote.getNet()));
                     break;
                 case DOWNFU:
                     vote.vote(Vote.Type.DOWNFU);
-                    voteText.setText(Integer.toString(vote.getNet()));
+                    voteText.setText(Long.toString(vote.getNet()));
                     break;
             }
-            voteButton.setPressed(true);
+            voteButton.setEnabled(false);
             oneVotePressed = true;
         } else {
-            switch(type){
-                case DOWNFU:
-                    vote.vote(Vote.Type.UPFU);
-                    voteText.setText(Integer.toString(vote.getNet()));
-                    break;
-                case UPFU:
-                    vote.vote(Vote.Type.DOWNFU);
-                    voteText.setText(Integer.toString(vote.getNet()));
-                    break;
-            }
-            voteButton.setPressed(false);
-            oneVotePressed = false;
+            vote.undo(type);
+            voteText.setText(Long.toString(vote.getNet()));
+            voteButton.setEnabled(true);
+            otherVote.setClickable(true);
         }
     }
 }

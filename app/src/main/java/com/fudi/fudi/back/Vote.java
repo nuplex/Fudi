@@ -8,8 +8,8 @@ package com.fudi.fudi.back;
  */
 public class Vote {
 
-    private int upvotes;
-    private int downvotes;
+    private long upvotes;
+    private long downvotes;
     private String userID;
 
     public enum Type{UPFU,DOWNFU}
@@ -31,7 +31,7 @@ public class Vote {
      * @param associate the user (ID) associated with this vote. This allows allows user's to have
      *                  their Fu updated when anyone upvotes or downvotes something they posted.
      */
-    public Vote(int upvotes, int downvotes, String associate){
+    public Vote(long upvotes, long downvotes, String associate){
         this.upvotes = upvotes;
         this.downvotes = downvotes;
     }
@@ -60,15 +60,31 @@ public class Vote {
         }
     }
 
-    public int getNet(){
+    public long getNet(){
         return upvotes - downvotes;
     }
 
-    public int getDownvotes() {
+    public long getDownvotes() {
         return downvotes;
     }
 
-    public int getUpvotes() {
+    public long getUpvotes() {
         return upvotes;
+    }
+
+    public void undo(Type vote){
+        if(vote == Type.UPFU){
+            upvotes--;
+        } else {
+            downvotes--;
+        }
+    }
+
+    public void setUpvotes(long upvotes) {
+        this.upvotes = upvotes;
+    }
+
+    public void setDownvotes(long downvotes) {
+        this.downvotes = downvotes;
     }
 }

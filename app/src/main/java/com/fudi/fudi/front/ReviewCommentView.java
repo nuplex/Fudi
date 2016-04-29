@@ -51,14 +51,17 @@ public class ReviewCommentView extends CommentView {
         text.setText(comment.getText());
 
         TextView netVote = (TextView)  commentView.findViewById(R.id.review_comment_vote_netvote);
-        netVote.setText(Integer.toString(vote.getNet()));
+        netVote.setText(Long.toString(vote.getNet()));
 
         //Set button actions
         ImageButton upvoteButton = (ImageButton) commentView.findViewById(R.id.review_comment_vote_upvote);
-        upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, netVote, oneVotePressed));
-
         ImageButton downvoteButton = (ImageButton) commentView.findViewById(R.id.review_comment_vote_downvote);
-        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU, netVote, oneVotePressed));
+
+        upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
+                netVote, oneVotePressed));
+
+        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU, upvoteButton,
+                netVote, oneVotePressed));
 
         //Load in the image
         ImageView image = (ImageView) commentView.findViewById(R.id.review_comment_image);

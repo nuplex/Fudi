@@ -1,5 +1,8 @@
 package com.fudi.fudi.back;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -12,15 +15,13 @@ public class CommentSection {
 
     private FudDetail parentFud;
     private TreeSet<Comment> comments; //ordered by first -> last
-    private String commentSectionID;
 
     private static final String PREFIX = "CS";
-    private CommentSection(){}
+    public CommentSection(){comments = new TreeSet<Comment>();}
 
     public CommentSection(FudDetail parent){
         this.parentFud = parent;
         comments = new TreeSet<Comment>();
-        commentSectionID = generateID();
     }
 
     /**
@@ -36,56 +37,6 @@ public class CommentSection {
         //DO NOT call pushComment() from here
     }
 
-    /**
-     * Deletes a comment
-     * @param comm the Comment to be deleted
-     */
-    public void deleteComment(Comment comm){
-        //TODO: delete comment from the comment section
-        
-        //TODO: delete comment from the database
-    }
-
-    /**
-     * Pushes the CommentSection to the database. Should only be called once from within
-     * the CommentSection class constructor.
-     */
-    public void push(){
-        //TODO: push this CommentSection to the database
-        //Need to push ID, all current comments,
-    }
-
-    /**
-     * Pushes a comment to the database for this CommentSection
-     * @param comm the Comment to be pushed
-     */
-    public void pushComment(Comment comm){
-        //TODO: push a comment to the database for the CommentSection/FudDetail
-        //Note a ReviewComment and GeneralComment should be distinguishable in the database
-    }
-
-    public void pushComments(){
-        //TODO: push all current comments to the database for the CommentSection/FudDetail
-        //Note a ReviewComment and GeneralComment should be distinguishable in the database
-
-        /*If this is a new Comment section, add it to the database. You will need to add a
-        reference to it's parent id as well.
-         */
-    }
-
-    public TreeSet<Comment> pullComments(){
-        //TODO: pull all comments for this CommentSection from the database
-        //Probably need to request by the CommentSection's ID
-        return null;
-    }
-
-    public String generateID(){
-        /* TODO: generate a unique ID for this comment section.
-            PREFIX+FUD_ID+something generated here
-         */
-        return PREFIX;
-    }
-
     public FudDetail getParentFud() {
         return parentFud;
     }
@@ -98,18 +49,46 @@ public class CommentSection {
         return comments;
     }
 
-    public String getCommentSectionID() {
-        return commentSectionID;
+    public TreeMap<String, Object> getFirebaseableComments(){
+        TreeMap<String, Object> firebaseable = new TreeMap<String, Object>();
+        int i = 0;
+        for(Comment c : comments){
+            firebaseable.put(Integer.toString(i), c.toFirebase());
+            i++;
+        }
+        if(firebaseable.isEmpty()){
+            firebaseable.put("placeholder","placeholder");
+        }
+
+        return firebaseable;
+    }
+
+    public static CommentSection firebaseToCommentSection(HashMap<String, Object> hm){
+        CommentSection cs = new CommentSection();
+        TreeSet<Comment> comms = new TreeSet<Comment>();
+        for(Object commentObject : hm.values()){
+            if(!(commentObject instanceof HashMap)){
+                continue;
+            }
+            HashMap<String, Object> commentMap = (HashMap<String, Object>) commentObject;
+            if(((String) commentMap.get("type")).equals("review")){
+                comms.add(ReviewComment.firebaseToReviewComment(commentMap));
+            } else {
+                comms.add(GeneralComment.firebaseToGeneralComment(commentMap));
+            }
+        }
+        cs.comments = comms;
+        return cs;
     }
 
     @Override
     public boolean equals(Object o){
         if(o == null){
             return false;
-        } else if(!(o instanceof  CommentSection)){
+        } else if(!(o instanceof  CommentSection)) {
             return false;
         } else {
-            return commentSectionID.equals(((CommentSection) o).commentSectionID);
+            return comments.equals(((CommentSection) o).comments);
         }
     }
 
