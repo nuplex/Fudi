@@ -1,14 +1,8 @@
 package com.fudi.fudi.back;
 
 import android.app.Activity;
-import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
-
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,21 +14,18 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
-import com.firebase.client.core.utilities.Tree;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Random;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -449,6 +440,68 @@ public class FudiApp {
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+    }
+
+    /**
+     * Updates the vote for any Voteable object
+     */
+    public void updateVote(Voteable v){
+        final AtomicBoolean done = new AtomicBoolean(false);
+
+        //TODO: First, push the changed vote data for this user
+
+        if(v instanceof FudDetail){
+            FudDetail fudDetail = (FudDetail) v;
+
+            //Get Location of the FudDetail we are updating.
+            String fudID = fudDetail.getFudID();
+            final Firebase fudRef = firebase.child(FUDDETAILS).child(fudID);
+            final Map<String, Object> votes = new TreeMap<String, Object>();
+            votes.put("downvotes", fudDetail.getVote().getDownvotes());
+            votes.put("upvotes", fudDetail.getVote().getUpvotes());
+
+            fudRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    fudRef.setValue(votes);
+                    done.set(true);
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    done.set(true);
+                }
+            });
+            return;
+        } else if(v instanceof Fud) {
+            Fud fud = (Fud) v;
+
+            //Get Location of the FudDetail we are updating.
+            String fudID = fud.getFudID();
+            final Firebase fudRef = firebase.child(FUDDETAILS).child(fudID);
+            final Map<String, Object> votes = new TreeMap<String, Object>();
+            votes.put("downvotes", fud.getVote().getDownvotes());
+            votes.put("upvotes", fud.getVote().getUpvotes());
+
+            fudRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    fudRef.setValue(votes);
+                    done.set(true);
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    done.set(true);
+                }
+            });
+        } else if(v instanceof Comment){
+            Comment comment = (Comment) v;
+            //Need to discriminate between a GeneralComment and ReviewComment
+            //TODO: Don't worry about this yet, or, you can. Same as above just storing the vote data.
+        }
     }
 
     /**
