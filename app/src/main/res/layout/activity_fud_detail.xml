@@ -1,208 +1,215 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fud_detail_frame_layout"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.fudi.fudi.front.FudDetailActivity"
-    android:id="@+id/fud_detail_frame_layout">
+    tools:context="com.fudi.fudi.front.FudDetailActivity">
 
-    <ScrollView
+    <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/fud_detail_scrollview" >
+        android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <ScrollView
+            android:id="@+id/fud_detail_scrollview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/fud_detail_parent_linear_layout">
+            android:layout_height="wrap_content">
 
             <LinearLayout
-                android:orientation="vertical"
+                android:id="@+id/fud_detail_parent_linear_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:id="@+id/fud_detail_detail">
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="210dp"
-                    android:id="@+id/fud_detail_dish"
-                    android:layout_gravity="center_horizontal"
-                    android:background="#000000" />
+                android:orientation="vertical">
 
                 <LinearLayout
-                    android:orientation="horizontal"
+                    android:id="@+id/fud_detail_detail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="150dp"
-                    android:id="@+id/fud_detail_main_area">
+                    android:layout_gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/fud_detail_dish"
+                        android:layout_width="match_parent"
+                        android:layout_height="210dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="#000000" />
 
                     <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_width="300dp"
-                        android:layout_height="match_parent"
-                        android:id="@+id/fud_detail_main"
-                        android:minHeight="200dp">
+                        android:id="@+id/fud_detail_main_area"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="150dp"
+                        android:orientation="horizontal">
 
                         <LinearLayout
-                            android:orientation="vertical"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/fud_detail_main_text"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Dish Title"
-                                android:id="@+id/fud_detail_dish_title"
-                                android:textStyle="bold"
-                                android:textColor="#7A7A7A"
-                                android:singleLine="false"
-                                android:textSize="22sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Restaurant"
-                                android:textColor="@color/fud_post_restaurant"
-                                android:id="@+id/fud_detail_restaurant"
-                                android:singleLine="false"
-                                android:textSize="19sp"
-                                />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="$0.00"
-                                android:id="@+id/fud_detail_cost"
-                                android:textSize="18sp"
-                                android:textColor="@color/secondary_color_darker"
-                                android:elegantTextHeight="false" />
-                        </LinearLayout>
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
+                            android:id="@+id/fud_detail_main"
+                            android:layout_width="300dp"
                             android:layout_height="match_parent"
-                            android:id="@+id/fud_detail_below_main_text">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="comment"
-                                android:textColor="@color/secondary_text_color"
-                                android:textSize="15sp"
-                                android:id="@+id/fud_detail_desc_text"
-                                android:paddingLeft="5dp"
-                                android:paddingRight="5dp" />
+                            android:minHeight="200dp"
+                            android:orientation="vertical">
 
                             <LinearLayout
-                                android:orientation="horizontal"
+                                android:id="@+id/fud_detail_main_text"
                                 android:layout_width="match_parent"
-                                android:layout_height="30dp"
-                                android:id="@+id/fud_detail_username_time"
-                                android:layout_alignParentBottom="true">
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingLeft="5dp"
+                                android:paddingRight="5dp">
 
                                 <TextView
+                                    android:id="@+id/fud_detail_dish_title"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="username"
-                                    android:id="@+id/fud_detail_username"
-                                    android:textColor="@color/fud_post_dishtitle_color"
-                                    android:textSize="17sp"
-                                    android:textStyle="bold"
-                                    android:textIsSelectable="false"
-                                    android:singleLine="true"
-                                    android:layout_marginLeft="5dp" />
+                                    android:singleLine="false"
+                                    android:text="Dish Title"
+                                    android:textColor="#7A7A7A"
+                                    android:textSize="22sp"
+                                    android:textStyle="bold" />
 
                                 <TextView
+                                    android:id="@+id/fud_detail_restaurant"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0 sec ago"
-                                    android:textColor="@color/fud_post_time_color"
-                                    android:id="@+id/fud_detail_time"
-                                    android:textSize="14sp"
-                                    android:singleLine="true"
-                                    android:layout_marginLeft="15dp" />
+                                    android:singleLine="false"
+                                    android:text="Restaurant"
+                                    android:textColor="@color/fud_post_restaurant"
+                                    android:textSize="19sp" />
+
+                                <TextView
+                                    android:id="@+id/fud_detail_cost"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:elegantTextHeight="false"
+                                    android:text="$0.00"
+                                    android:textColor="@color/secondary_color_darker"
+                                    android:textSize="18sp" />
                             </LinearLayout>
 
-                        </RelativeLayout>
+                            <RelativeLayout
+                                android:id="@+id/fud_detail_below_main_text"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent">
+
+                                <TextView
+                                    android:id="@+id/fud_detail_desc_text"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:paddingLeft="5dp"
+                                    android:paddingRight="5dp"
+                                    android:text="comment"
+                                    android:textColor="@color/secondary_text_color"
+                                    android:textSize="15sp" />
+
+                                <LinearLayout
+                                    android:id="@+id/fud_detail_username_time"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="30dp"
+                                    android:layout_alignParentBottom="true"
+                                    android:orientation="horizontal">
+
+                                    <TextView
+                                        android:id="@+id/fud_detail_username"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginLeft="5dp"
+                                        android:singleLine="true"
+                                        android:text="username"
+                                        android:textColor="@color/fud_post_dishtitle_color"
+                                        android:textIsSelectable="false"
+                                        android:textSize="17sp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:id="@+id/fud_detail_time"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginLeft="15dp"
+                                        android:singleLine="true"
+                                        android:text="0 sec ago"
+                                        android:textColor="@color/fud_post_time_color"
+                                        android:textSize="14sp" />
+                                </LinearLayout>
+
+                            </RelativeLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/fud_detail_vote_area"
+                            android:layout_width="fill_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center|top"
+                            android:background="@color/fud_post_vote_area_color"
+                            android:gravity="center_vertical|center_horizontal"
+                            android:measureWithLargestChild="true"
+                            android:minHeight="150dp"
+                            android:orientation="vertical">
+
+                            <ImageButton
+                                android:id="@+id/fud_detail_upvote_button"
+                                android:layout_width="35dp"
+                                android:layout_height="25dp"
+                                android:background="@drawable/upvote_button" />
+
+                            <Space
+                                android:layout_width="1dp"
+                                android:layout_height="10dp" />
+
+                            <ImageButton
+                                android:id="@+id/fud_detail_downvote_button"
+                                android:layout_width="35dp"
+                                android:layout_height="25dp"
+                                android:background="@drawable/downvote_button" />
+
+                            <Space
+                                android:layout_width="1dp"
+                                android:layout_height="10dp" />
+
+                            <TextView
+                                android:id="@+id/fud_detail_netvote"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:gravity="center_vertical|center_horizontal"
+                                android:text="00"
+                                android:textColor="@color/default_text_color"
+                                android:textSize="25dp" />
+                        </LinearLayout>
 
                     </LinearLayout>
+                </LinearLayout>
 
-                    <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_width="fill_parent"
-                        android:layout_height="match_parent"
-                        android:minHeight="150dp"
-                        android:id="@+id/fud_detail_vote_area"
-                        android:layout_gravity="center|top"
-                        android:gravity="center_vertical|center_horizontal"
-                        android:background="@color/fud_post_vote_area_color"
-                        android:measureWithLargestChild="true" >
+                <View
+                    android:id="@+id/fud_detail_review_comment_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="7dp"
+                    android:background="@color/fud_post_vote_area_color" />
 
-                        <ImageButton
-                            android:layout_width="35dp"
-                            android:layout_height="25dp"
-                            android:id="@+id/fud_detail_upvote_button"
-                            android:background="@drawable/upvote_button" />
-
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="10dp" />
-
-                        <ImageButton
-                            android:layout_width="35dp"
-                            android:layout_height="25dp"
-                            android:id="@+id/fud_detail_downvote_button"
-                            android:background="@drawable/downvote_button" />
-
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="10dp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textColor="@color/default_text_color"
-                            android:text="00"
-                            android:id="@+id/fud_detail_netvote"
-                            android:layout_gravity="center"
-                            android:textSize="25dp"
-                            android:gravity="center_vertical|center_horizontal" />
-                    </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/fud_detail_comment_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:orientation="vertical">
 
                 </LinearLayout>
+
+                <Space
+                    android:layout_width="1dp"
+                    android:layout_height="45dp" />
             </LinearLayout>
+        </ScrollView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="7dp"
-                android:background="@color/fud_post_vote_area_color"
-                android:id="@+id/fud_detail_review_comment_divider" />
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/fud_detail_comment_section"
-                android:layout_gravity="center_horizontal">
-
-            </LinearLayout>
-
-            <Space
-                android:layout_width="1dp"
-                android:layout_height="45dp" />
-        </LinearLayout>
-    </ScrollView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <ImageButton
+        android:id="@+id/fudi_detail_add_comment_button"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:id="@+id/fudi_detail_add_comment_button"
         android:layout_gravity="right|bottom"
-        android:background="@drawable/add_comment_button"
+        android:layout_marginBottom="3dp"
         android:layout_marginRight="5dp"
-        android:layout_marginBottom="3dp" />
+        android:background="@drawable/add_comment_button" />
 
 </FrameLayout>

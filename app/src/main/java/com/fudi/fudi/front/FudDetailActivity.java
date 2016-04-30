@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -55,12 +56,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.TreeSet;
 
-public class FudDetailActivity extends AppCompatActivity {
+public class FudDetailActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     private TreeSet<CommentView> comments;
     private LinearLayout commentList;
     private FudDetail fudDetail;
     private FrameLayout mainframe;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private FrameLayout popupChooser;
     private FrameLayout popupAddComment;
@@ -153,6 +155,10 @@ public class FudDetailActivity extends AppCompatActivity {
               the new data.
 
          */
+
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(this);
     }
 
     @Override
@@ -336,6 +342,13 @@ public class FudDetailActivity extends AppCompatActivity {
     private void submitFail(){
         Toast.makeText(this, "There was a probelm :(", Toast.LENGTH_LONG).show();
         onBackPressed();
+    }
+
+    @Override
+    public void onRefresh() {
+        swipeRefreshLayout.setRefreshing(true);
+        pull();
+        swipeRefreshLayout.setRefreshing(false);
     }
 
 
