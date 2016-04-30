@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -50,9 +51,14 @@ public class MainActivity extends AppCompatActivity {
     private TreeSet<FudView> fudViews;
     private ScrollView scroll;
     private LoadImageInViewTask liivt;
+    private FrameLayout mainframe;
     protected static final int FUD_CREATION_SUCCESS =  1;
     protected static final int FUD_CREATION_FAILURE =  2;
     protected static final int LOGIN_SUCCESS = 3;
+
+    public MainActivity() {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         fudList = (LinearLayout) findViewById(R.id.main_fud_list);
         fudViews = new TreeSet<FudView>();
-
+        mainframe = (FrameLayout) findViewById(R.id.main_frame_layout);
         //set button onClickListener
         ImageButton newFudButton = (ImageButton) findViewById(R.id.main_new_fud_button);
         newFudButton.setOnClickListener(new View.OnClickListener() {
@@ -116,8 +122,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //liivt = new LoadImageInViewTask(fudViews, scroll);
-
-        //TODO: load in any new posts from database (real when thats finished)
 
         //liivt.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         (new AsyncTask<Void, Void, Void>(){
@@ -270,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
             Space between = new Space(MainActivity.this);
             between.getLayoutParams().height = ImageHandler.pfdp(20,MainActivity.this);
 
-            if(toDisplay >= 0){
+            if(toDisplay > 0){
                 fv.loadImage();
                 toDisplay--;
             }
@@ -328,6 +332,8 @@ public class MainActivity extends AppCompatActivity {
 
     private class LoadImageInViewTask extends AsyncTask<Void, Void, Void>{
 
+        int count = 0;
+
         TreeSet<FudView> views;
         ScrollView scroll;
         public int pauseTime;
@@ -335,13 +341,14 @@ public class MainActivity extends AppCompatActivity {
         public LoadImageInViewTask(TreeSet<FudView> views, ScrollView scroll){
             this.views = views;
             this.scroll = scroll;
-            pauseTime = 100;
+            pauseTime = 500;
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             while(!isCancelled()) {
-                int cont = 4;
+                int cont = 3;
+                count = 0;
                 for (final FudView view : views) {
                     if(views.size() == 1){
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -356,33 +363,25 @@ public class MainActivity extends AppCompatActivity {
                     if(cont < 0){
                         break;
                     }
-                    final AtomicBoolean lastWasVisible = new AtomicBoolean(false);
-                    final AtomicBoolean foundFirstAfterVisible = new AtomicBoolean(false);
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            if(view.imageIsLoaded()){
-                                return;
-                            }
-
                             Rect scrollBounds = new Rect();
+                            Rect viewBounds = new Rect();
+
                             scroll.getHitRect(scrollBounds);
-                            if (view.getLocalVisibleRect(scrollBounds)) {
+                            view.getLocalVisibleRect(viewBounds);
+                            if (!view.getLocalVisibleRect(scrollBounds)) {
+                                if(view.imageIsLoaded()){
+                                    return;
+                                }
                                 view.loadImage();
-                                lastWasVisible.set(true);
                             } else {
                                 view.unloadImage();
-                                if(!foundFirstAfterVisible.get()) {
-                                    if (lastWasVisible.get()) {
-                                        foundFirstAfterVisible.set(true);
-                                    }
-                                }
                             }
                         }
                     });
-                    if(lastWasVisible.get() && foundFirstAfterVisible.get()){
-                        cont--;
-                    }
+                    count++;
                 }
                 synchronized (this) {
                     try {

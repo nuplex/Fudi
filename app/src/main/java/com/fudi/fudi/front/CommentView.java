@@ -56,8 +56,12 @@ public class CommentView extends View implements Comparable<CommentView>{
         ImageButton upvoteButton = (ImageButton) commentView.findViewById(R.id.comment_vote_upvote);
         ImageButton downvoteButton = (ImageButton) commentView.findViewById(R.id.comment_vote_downvote);
 
-        upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton, netVote, oneVotePressed));
-        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU, upvoteButton, netVote, oneVotePressed));
+        upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
+                netVote, oneVotePressed, comment, comment.getParent().getParentFud().getFudID(),
+                comment.getWhoPosted().getUserID()));
+        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU,
+                upvoteButton, netVote, oneVotePressed, comment,
+                comment.getParent().getParentFud().getFudID(), comment.getWhoPosted().getUserID()));
     }
 
     /**

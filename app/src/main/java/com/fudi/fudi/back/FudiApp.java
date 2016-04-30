@@ -52,9 +52,9 @@ public class FudiApp {
     private static FudiApp app = new FudiApp();
 
     private static final String SERVER_LOCATION = "https://fudiapp.firebaseio.com/";
-    private static final String USERS = "users";
-    private static final String FUDDETAILS = "fudDetails";
-    private static final String COMMENTS = "comments";
+    public static final String USERS = "users";
+    public static final String FUDDETAILS = "fudDetails";
+    public static final String COMMENTS = "comments";
     private static final int TIMEOUT = 10000;
 
     private static final int DEFAULT_FUD_PULL_NUM = 25;
@@ -449,6 +449,10 @@ public class FudiApp {
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+    }
+
+    public Firebase getFirebase() {
+        return firebase;
     }
 
     /**

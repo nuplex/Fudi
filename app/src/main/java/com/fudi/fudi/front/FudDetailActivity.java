@@ -126,10 +126,11 @@ public class FudDetailActivity extends AppCompatActivity {
         ImageButton downvoteButton = (ImageButton) findViewById(R.id.fud_detail_downvote_button);
 
         upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
-                netVote, oneVotePressed));
-
-        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU, upvoteButton,
-                netVote, oneVotePressed));
+                netVote, oneVotePressed, null, fudDetail.getFudID(),
+                fudDetail.getWhoPosted().getUserID()));
+        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU,
+                upvoteButton, netVote, oneVotePressed, null,
+                fudDetail.getFudID(), fudDetail.getWhoPosted().getUserID()));
 
         //Load in the image
         ImageView image = (ImageView) findViewById(R.id.fud_detail_dish);

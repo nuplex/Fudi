@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="entry_dish_min_char">1</integer>
-    <integer name="entry_dish_max_char">20</integer>
+    <integer name="entry_dish_max_char">40</integer>
     <integer name="entry_restaurant_min_char">1</integer>
     <integer name="entry_restaurant_max_char">40</integer>
     <integer name="entry_desc_min_char">0</integer>

@@ -31,7 +31,7 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences sharedPref = getSharedPreferences(
                 getString(R.string.preference_file_key), MODE_PRIVATE);
         String firstTime = sharedPref.getString("firstTime", "false");
-        if(firstTime.equals("true")){
+        if(firstTime.equals("false")){
             register.setText("Login");
             register.setOnClickListener(new View.OnClickListener() {
                 @Override

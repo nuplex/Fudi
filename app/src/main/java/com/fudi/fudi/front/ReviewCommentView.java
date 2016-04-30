@@ -58,10 +58,11 @@ public class ReviewCommentView extends CommentView {
         ImageButton downvoteButton = (ImageButton) commentView.findViewById(R.id.review_comment_vote_downvote);
 
         upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
-                netVote, oneVotePressed));
-
-        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU, upvoteButton,
-                netVote, oneVotePressed));
+                netVote, oneVotePressed, comment, comment.getParent().getParentFud().getFudID(),
+                comment.getWhoPosted().getUserID()));
+        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU,
+                upvoteButton, netVote, oneVotePressed, comment,
+                comment.getParent().getParentFud().getFudID(), comment.getWhoPosted().getUserID()));
 
         //Load in the image
         ImageView image = (ImageView) commentView.findViewById(R.id.review_comment_image);

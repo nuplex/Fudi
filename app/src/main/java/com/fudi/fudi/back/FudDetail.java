@@ -80,7 +80,7 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
      */
     public Fud simplify(){
         return new Fud(fudID, imageURL, dishName, restaurant, cost, vote,
-                commentSection.getCommentNumber(), timestamp);
+                commentSection.getCommentNumber(), timestamp, whoPosted.getUserID());
     }
 
 
