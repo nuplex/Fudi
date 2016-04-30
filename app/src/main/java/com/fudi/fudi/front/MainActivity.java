@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.internal.app.ToolbarActionBar;
 import android.util.Log;
@@ -45,13 +46,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+
+    private static final String TAG = "Fudi-App";
 
     private LinearLayout fudList;
     private TreeSet<FudView> fudViews;
     private ScrollView scroll;
     private LoadImageInViewTask liivt;
     private FrameLayout mainframe;
+    private SwipeRefreshLayout swipeRefreshLayout;
     protected static final int FUD_CREATION_SUCCESS =  1;
     protected static final int FUD_CREATION_FAILURE =  2;
     protected static final int LOGIN_SUCCESS = 3;
@@ -135,18 +139,9 @@ public class MainActivity extends AppCompatActivity {
 
         pull();
 
-        /**
-         * TODO: Implement a feature for the screen where if the user overscrolls the top, the list
-         * is updated, that is, "Pull down top of screen and refresh"
-         *
-         * This is seen in many apps, like Facebook, Instagram, Yikyak
-         * This probably invovles a listener, so a make a private class for that listener, code the
-         * logic there, and add it to fudList (fudList is the one that is being scrolled).
-         *
-         *
-         * the amount. This will get new Fuds which you will have to replace into the fudList
-         * (just fudList.add(...);)
-         */
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(this);
+
     }
 
     @Override
@@ -328,6 +323,28 @@ public class MainActivity extends AppCompatActivity {
     public void removeAll() {
         fudViews.clear();
         fudList.removeAllViews();
+    }
+
+
+    /**
+     * TODO: Implement a feature for the screen where if the user overscrolls the top, the list
+     * is updated, that is, "Pull down top of screen and refresh"
+     *
+     * This is seen in many apps, like Facebook, Instagram, Yikyak
+     * This probably invovles a listener, so a make a private class for that listener, code the
+     * logic there, and add it to fudList (fudList is the one that is being scrolled).
+     *
+     *
+     * the amount. This will get new Fuds which you will have to replace into the fudList
+     * (just fudList.add(...);)
+     */
+    @Override
+    public void onRefresh() {
+        // TODO - Joan
+        // query db and fetch new Fuds
+        swipeRefreshLayout.setRefreshing(true); // sets the refresh animation
+        pull();
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     private class LoadImageInViewTask extends AsyncTask<Void, Void, Void>{

@@ -1,48 +1,55 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_frame_layout"
-    android:gravity="center_vertical|center_horizontal">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical|center_horizontal"
+    tools:context=".MainActivity">
 
-    <ScrollView
+    <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/main_scrollview" >
+        android:layout_height="wrap_content">
 
-        <RelativeLayout
+        <ScrollView
+            android:id="@+id/main_scrollview"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <LinearLayout
-                android:orientation="vertical"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top"
-                android:gravity="center_horizontal"
-                android:id="@+id/main_fud_list"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="15dp">
+                android:layout_height="match_parent">
 
-            </LinearLayout>
-        </RelativeLayout>
-    </ScrollView>
+                <LinearLayout
+                    android:id="@+id/main_fud_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="center_horizontal|top"
+                    android:layout_marginTop="15dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                </LinearLayout>
+            </RelativeLayout>
+        </ScrollView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/main_new_fud_button_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/main_new_fud_button_area"
+        android:layout_gravity="center|bottom"
         android:gravity="center_vertical|center_horizontal"
-        android:layout_gravity="center|bottom">
+        android:orientation="vertical">
 
         <ImageButton
+            android:id="@+id/main_new_fud_button"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:id="@+id/main_new_fud_button"
-            android:background="@drawable/new_fud_button"
             android:layout_margin="5dp"
+            android:background="@drawable/new_fud_button"
             android:contentDescription="New Post Button" />
 
     </LinearLayout>
