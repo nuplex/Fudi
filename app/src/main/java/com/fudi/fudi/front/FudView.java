@@ -42,6 +42,7 @@ public class FudView extends View implements Comparable<FudView> {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
         fudView = (LinearLayout) inflater.inflate(R.layout.fud_post, null);
         init(context, fud);
+
     }
 
     public FudView(Context context, ViewGroup parent, Fud fud){

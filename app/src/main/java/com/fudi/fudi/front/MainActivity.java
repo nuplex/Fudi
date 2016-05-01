@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private LoadImageInViewTask liivt;
     private FrameLayout mainframe;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private ImageManager imgManager;
+
     protected static final int FUD_CREATION_SUCCESS =  1;
     protected static final int FUD_CREATION_FAILURE =  2;
     protected static final int LOGIN_SUCCESS = 3;
@@ -74,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         fudList = (LinearLayout) findViewById(R.id.main_fud_list);
         fudViews = new TreeSet<FudView>();
         mainframe = (FrameLayout) findViewById(R.id.main_frame_layout);
+        imgManager = new ImageManager(getApplicationContext());
+
         //set button onClickListener
         ImageButton newFudButton = (ImageButton) findViewById(R.id.main_new_fud_button);
         newFudButton.setOnClickListener(new View.OnClickListener() {
@@ -204,12 +208,21 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent i = new Intent(MainActivity.this, SettingsActivity.class);
-            startActivity(i);
-            return true;
+        switch(id) {
+            case R.id.action_location_here:
+                // TODO not sure what this is supposed to do
+                return true;
+            case R.id.fudi_action_user_account:
+                Intent i = new Intent(MainActivity.this, MeActivity.class);
+                startActivity(i);
+                return true;
+            case R.id.action_settings:
+                Intent j = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(j);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     public boolean networkCheck(){
