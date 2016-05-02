@@ -30,6 +30,7 @@ public class Fud implements Comparable<Fud>, Voteable{
     private Vote vote;
     private String dishName;
     private String fudID;
+    private String userID;
     private String restaurant;
     private String cost;
     private int comments;
@@ -39,7 +40,7 @@ public class Fud implements Comparable<Fud>, Voteable{
 
 
     protected Fud(String fudID, String imageURL, String dishName, String restaurant, String cost,
-                  Vote vote, int comments, Date timestamp){
+                  Vote vote, int comments, Date timestamp, String userID){
         this.fudID = fudID;
         this.dishName = dishName;
         this.imageURL = imageURL;
@@ -48,6 +49,7 @@ public class Fud implements Comparable<Fud>, Voteable{
         this.vote = vote;
         this.comments = comments;
         this.timestamp = timestamp;
+        this.userID = userID;
     }
 
     /**
@@ -82,6 +84,10 @@ public class Fud implements Comparable<Fud>, Voteable{
 
     public Date getTimestamp() {
         return timestamp;
+    }
+
+    public String getUserID() {
+        return userID;
     }
 
     public String getTimeSincePostedString(){

@@ -3,6 +3,7 @@ package com.fudi.fudi.front;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.media.Image;
 import android.support.v4.view.LayoutInflaterCompat;
 import android.view.LayoutInflater;
@@ -41,6 +42,7 @@ public class FudView extends View implements Comparable<FudView> {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
         fudView = (LinearLayout) inflater.inflate(R.layout.fud_post, null);
         init(context, fud);
+
     }
 
     public FudView(Context context, ViewGroup parent, Fud fud){
@@ -98,10 +100,11 @@ public class FudView extends View implements Comparable<FudView> {
         ImageButton downvoteButton = (ImageButton) fudView.findViewById(R.id.fud_post_downvote_button);
 
         upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
-                netVote, oneVotePressed));
-
-        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU, upvoteButton,
-                netVote, oneVotePressed));
+                netVote, oneVotePressed, null, fud.getFudID(),
+                fud.getUserID()));
+        downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU,
+                upvoteButton, netVote, oneVotePressed, null,
+                fud.getFudID(), fud.getUserID()));
 
         //Set comment button
         Button commentButton = (Button) fudView.findViewById(R.id.fud_post_comment_button);
@@ -131,6 +134,8 @@ public class FudView extends View implements Comparable<FudView> {
     public boolean imageIsLoaded(){
         return imageLoaded;
     }
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -168,4 +173,5 @@ public class FudView extends View implements Comparable<FudView> {
             return frhs.getTimestamp().compareTo(flhs.getTimestamp());
         }
     }
+
 }

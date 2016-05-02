@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.internal.app.ToolbarActionBar;
 import android.util.Log;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -44,15 +46,25 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+
+    private static final String TAG = "Fudi-App";
 
     private LinearLayout fudList;
     private TreeSet<FudView> fudViews;
     private ScrollView scroll;
     private LoadImageInViewTask liivt;
+    private FrameLayout mainframe;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private ImageManager imgManager;
+
     protected static final int FUD_CREATION_SUCCESS =  1;
     protected static final int FUD_CREATION_FAILURE =  2;
     protected static final int LOGIN_SUCCESS = 3;
+
+    public MainActivity() {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
         fudList = (LinearLayout) findViewById(R.id.main_fud_list);
         fudViews = new TreeSet<FudView>();
+        mainframe = (FrameLayout) findViewById(R.id.main_frame_layout);
+        imgManager = new ImageManager(getApplicationContext());
 
         //set button onClickListener
         ImageButton newFudButton = (ImageButton) findViewById(R.id.main_new_fud_button);
@@ -117,8 +131,6 @@ public class MainActivity extends AppCompatActivity {
 
         //liivt = new LoadImageInViewTask(fudViews, scroll);
 
-        //TODO: load in any new posts from database (real when thats finished)
-
         //liivt.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         (new AsyncTask<Void, Void, Void>(){
 
@@ -131,18 +143,9 @@ public class MainActivity extends AppCompatActivity {
 
         pull();
 
-        /**
-         * TODO: Implement a feature for the screen where if the user overscrolls the top, the list
-         * is updated, that is, "Pull down top of screen and refresh"
-         *
-         * This is seen in many apps, like Facebook, Instagram, Yikyak
-         * This probably invovles a listener, so a make a private class for that listener, code the
-         * logic there, and add it to fudList (fudList is the one that is being scrolled).
-         *
-         *
-         * the amount. This will get new Fuds which you will have to replace into the fudList
-         * (just fudList.add(...);)
-         */
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(this);
+
     }
 
     @Override
@@ -205,10 +208,21 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch(id) {
+            case R.id.action_location_here:
+                // TODO not sure what this is supposed to do
+                return true;
+            case R.id.fudi_action_user_account:
+                Intent i = new Intent(MainActivity.this, MeActivity.class);
+                startActivity(i);
+                return true;
+            case R.id.action_settings:
+                Intent j = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(j);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     public boolean networkCheck(){
@@ -270,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
             Space between = new Space(MainActivity.this);
             between.getLayoutParams().height = ImageHandler.pfdp(20,MainActivity.this);
 
-            if(toDisplay >= 0){
+            if(toDisplay > 0){
                 fv.loadImage();
                 toDisplay--;
             }
@@ -326,7 +340,31 @@ public class MainActivity extends AppCompatActivity {
         fudList.removeAllViews();
     }
 
+
+    /**
+     * TODO: Implement a feature for the screen where if the user overscrolls the top, the list
+     * is updated, that is, "Pull down top of screen and refresh"
+     *
+     * This is seen in many apps, like Facebook, Instagram, Yikyak
+     * This probably invovles a listener, so a make a private class for that listener, code the
+     * logic there, and add it to fudList (fudList is the one that is being scrolled).
+     *
+     *
+     * the amount. This will get new Fuds which you will have to replace into the fudList
+     * (just fudList.add(...);)
+     */
+    @Override
+    public void onRefresh() {
+        // TODO - Joan
+        // query db and fetch new Fuds
+        swipeRefreshLayout.setRefreshing(true); // sets the refresh animation
+        pull();
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
     private class LoadImageInViewTask extends AsyncTask<Void, Void, Void>{
+
+        int count = 0;
 
         TreeSet<FudView> views;
         ScrollView scroll;
@@ -335,13 +373,14 @@ public class MainActivity extends AppCompatActivity {
         public LoadImageInViewTask(TreeSet<FudView> views, ScrollView scroll){
             this.views = views;
             this.scroll = scroll;
-            pauseTime = 100;
+            pauseTime = 500;
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             while(!isCancelled()) {
-                int cont = 4;
+                int cont = 3;
+                count = 0;
                 for (final FudView view : views) {
                     if(views.size() == 1){
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -356,33 +395,25 @@ public class MainActivity extends AppCompatActivity {
                     if(cont < 0){
                         break;
                     }
-                    final AtomicBoolean lastWasVisible = new AtomicBoolean(false);
-                    final AtomicBoolean foundFirstAfterVisible = new AtomicBoolean(false);
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            if(view.imageIsLoaded()){
-                                return;
-                            }
-
                             Rect scrollBounds = new Rect();
+                            Rect viewBounds = new Rect();
+
                             scroll.getHitRect(scrollBounds);
-                            if (view.getLocalVisibleRect(scrollBounds)) {
+                            view.getLocalVisibleRect(viewBounds);
+                            if (!view.getLocalVisibleRect(scrollBounds)) {
+                                if(view.imageIsLoaded()){
+                                    return;
+                                }
                                 view.loadImage();
-                                lastWasVisible.set(true);
                             } else {
                                 view.unloadImage();
-                                if(!foundFirstAfterVisible.get()) {
-                                    if (lastWasVisible.get()) {
-                                        foundFirstAfterVisible.set(true);
-                                    }
-                                }
                             }
                         }
                     });
-                    if(lastWasVisible.get() && foundFirstAfterVisible.get()){
-                        cont--;
-                    }
+                    count++;
                 }
                 synchronized (this) {
                     try {
