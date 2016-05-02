@@ -477,7 +477,8 @@ public class FudiApp {
                     done.set(true);
                 }
             });
-            return;
+
+            busyWaitOrTimeout(done);
         } else if(v instanceof Fud) {
             Fud fud = (Fud) v;
 
@@ -495,17 +496,44 @@ public class FudiApp {
                     fudRef.setValue(votes);
                     done.set(true);
                 }
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    done.set(true);
+                }
+            });
+
+            busyWaitOrTimeout(done);
+        } else if(v instanceof Comment){
+            Comment comment = (Comment) v;
+            CommentSection cSection = (CommentSection) comment.getParent();
+            FudDetail fDetail = (FudDetail) cSection.getParentFud();
+            //Need to discriminate between a GeneralComment and ReviewComment
+            //TODO: Don't worry about this yet, or, you can. Same as above just storing the vote data.
+
+            String fudID = fDetail.getFudID();
+            final Firebase fudRef = firebase.child(FUDDETAILS).child(fudID).child(COMMENTS)
+                    .child(comment.getText());
+            final Map<String, Object> votes = new TreeMap<String, Object>();
+            votes.put("downvotes", fDetail.getVote().getDownvotes());
+            votes.put("upvotes", fDetail.getVote().getUpvotes());
+            fudRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    fudRef.setValue(votes);
+                    done.set(true);
+                }
 
                 @Override
                 public void onCancelled(FirebaseError firebaseError) {
                     done.set(true);
                 }
             });
-        } else if(v instanceof Comment){
-            Comment comment = (Comment) v;
-            //Need to discriminate between a GeneralComment and ReviewComment
-            //TODO: Don't worry about this yet, or, you can. Same as above just storing the vote data.
+
+            busyWaitOrTimeout(done);
         }
+
+        return;
     }
 
     /**
