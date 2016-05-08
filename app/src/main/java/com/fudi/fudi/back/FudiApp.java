@@ -1,15 +1,8 @@
 package com.fudi.fudi.back;
 
 import android.app.Activity;
-import android.app.Application;
-import android.app.Notification;
-import android.content.Context;
-import android.content.Intent;
-
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.SmsManager;
@@ -22,21 +15,17 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
-import com.firebase.client.core.utilities.Tree;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Random;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -160,26 +149,66 @@ public class FudiApp {
         return currentFudDetailToDisplay;
     }
 
-   /* public CommentSection pullCommentSectionForFudDetail(String fudId) {
-        final Firebase fudDetailCommentsRef = firebase.child(FUDDETAILS).child(fudId).child(COMMENTS);
-        final AtomicBoolean done = new AtomicBoolean(false);
-        fudDetailCommentsRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                currentOperatingCommentSection =
-                        CommentSection.firebaseToCommentSection(
-                                (HashMap<String, Object>) dataSnapshot.getValue());
-                done.set(true);
-            }
+    public void updateVote(Voteable v){
 
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                done.set(true);
-            }
-        });
+        TreeMap<String, Object> votes = new TreeMap<String, Object>();
 
-        return currentOperatingCommentSection;
-    } */
+        if( v instanceof Fud) {
+            Fud f = (Fud) v;
+            final Firebase fudDetailRef = firebase.child(FUDDETAILS).child(f.getFudID());
+
+            votes.put("upvotes", f.getVote().getUpvotes());
+            votes.put("downvotes", f.getVote().getDownvotes());
+
+            fudDetailRef.updateChildren(votes);
+
+
+        } else if (v instanceof FudDetail){
+            FudDetail fd = (FudDetail) v;
+            final Firebase fudDetailRef = firebase.child(FUDDETAILS).child(fd.getFudID());
+
+            votes.put("upvotes", fd.getVote().getUpvotes());
+            votes.put("downvotes", fd.getVote().getDownvotes());
+
+            fudDetailRef.updateChildren(votes);
+
+        } else if (v instanceof Comment){
+            Comment c = (Comment) v;
+            long commentNumber = c.getCommentNumber();
+
+            final Firebase fudDetailRef = firebase.child(FUDDETAILS).child(
+                    c.getParent().getParentFud().getFudID()).child("comments").child(String.valueOf(c.getCommentNumber()));
+
+            votes.put("upvotes", c.getVote().getUpvotes());
+            votes.put("downvotes", c.getVote().getDownvotes());
+
+            fudDetailRef.updateChildren(votes);
+
+        }
+
+    }
+
+
+//   public CommentSection pullCommentSectionForFudDetail(String fudId) {
+//        final Firebase fudDetailCommentsRef = firebase.child(FUDDETAILS).child(fudId).child(COMMENTS);
+//        final AtomicBoolean done = new AtomicBoolean(false);
+//        fudDetailCommentsRef.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                currentOperatingCommentSection =
+//                        CommentSection.firebaseToCommentSection(
+//                                (HashMap<String, Object>) dataSnapshot.getValue());
+//                done.set(true);
+//            }
+//
+//            @Override
+//            public void onCancelled(FirebaseError firebaseError) {
+//                done.set(true);
+//            }
+//        });
+//
+//        return currentOperatingCommentSection;
+//    }
 
 
     @Deprecated
@@ -321,6 +350,7 @@ public class FudiApp {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 long i = dataSnapshot.getChildrenCount();
+                comment.setCommentNumber(i);
                 fudDetailCommentsRef.child(Long.toString(i)).push();
                 fudDetailCommentsRef.child(Long.toString(i)).setValue(comment.toFirebase());
                 done.set(true);
