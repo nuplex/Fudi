@@ -3,7 +3,7 @@
     <item android:state_enabled="false">
         <shape>
             <solid android:color="@color/text_entry_disabled"/>
-            <stroke android:color="@color/text_entry_border"
+            <stroke android:color="@color/secondary_color_darker"
                 android:width="3dp"/>
             <corners android:radius="20dp"/>
         </shape>
@@ -11,7 +11,7 @@
     <item>
         <shape>
             <solid android:color="@color/text_entry_border_white"/>
-            <stroke android:color="@color/text_entry_border"
+            <stroke android:color="@color/secondary_color_darker"
                 android:width="3dp"/>
             <corners android:radius="20dp"/>
         </shape>

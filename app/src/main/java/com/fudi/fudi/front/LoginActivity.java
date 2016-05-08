@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +29,7 @@ public class LoginActivity extends AppCompatActivity {
         Firebase.setAndroidContext(getApplicationContext());
 
         Button register = (Button) findViewById(R.id.login_register_button);
+        register.setEnabled(true);
         SharedPreferences sharedPref = getSharedPreferences(
                 getString(R.string.preference_file_key), MODE_PRIVATE);
         String firstTime = sharedPref.getString("firstTime", "false");
@@ -40,8 +42,14 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         } else {
+            register.setOnClickListener(new View.OnClickListener(){
 
-            //TODO: implement registration
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(LoginActivity.this, RegistrationActivity.class));
+                }
+
+            });
         }
 
         Button justContinue = (Button) findViewById(R.id.login_just_continue_button);

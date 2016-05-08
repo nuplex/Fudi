@@ -217,7 +217,7 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
         fd.tags =  firebaseTagsToStrings(hm.get("tags"));
         fd.whoPosted = User.getStandInUser(userID, (String) hm.get("whoPostedName"));
         fd.vote = new Vote((long) hm.get("upvotes"), (long) hm.get("downvotes"), userID);
-        fd.commentSection = CommentSection.firebaseToCommentSection( (HashMap<String, Object>) hm.get("comments"));
+        fd.commentSection = CommentSection.firebaseToCommentSection( (HashMap<String, Object>) hm.get("comments"), fd);
         fd.timestamp = new Date((long) hm.get("timestamp"));
         fd.locationOfRestaurant.setLatitude((Double) hm.get("restLocLat"));
         fd.locationOfRestaurant.setLongitude((Double) hm.get("restLocLong"));

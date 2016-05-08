@@ -31,4 +31,8 @@
 
     <color name="secondary_color">#c0d7ff</color>
     <color name="secondary_color_darker">#74A6FF</color>
+    <color name="secondary_color_darker2">#5C84CC</color>
+    <color name="secondary_color_darkerer">#003188</color>
+
+    <color name="text_entry_disabled">#DEDEDE</color>
 </resources>

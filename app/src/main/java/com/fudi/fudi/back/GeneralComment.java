@@ -18,10 +18,9 @@ public class GeneralComment extends Comment {
         super(text, whoPosted, parent);
     }
 
-    public static GeneralComment firebaseToGeneralComment(HashMap<String, Object> hm){
+    public static GeneralComment firebaseToGeneralComment(HashMap<String, Object> hm, CommentSection parent){
         String text = (String) hm.get("text");
         User whoPosted = User.getStandInUser((String) hm.get("userID"), (String) hm.get("username"));
-        CommentSection parent = null; //not actually needed
         GeneralComment gc = new GeneralComment(text, whoPosted, parent);
         Vote v = gc.getVote();
         v.setUpvotes((long) hm.get("upvotes"));

@@ -63,7 +63,7 @@ public class CommentSection {
         return firebaseable;
     }
 
-    public static CommentSection firebaseToCommentSection(HashMap<String, Object> hm){
+    public static CommentSection firebaseToCommentSection(HashMap<String, Object> hm, FudDetail parentFud){
         CommentSection cs = new CommentSection();
         TreeSet<Comment> comms = new TreeSet<Comment>();
         for(Object commentObject : hm.values()){
@@ -72,12 +72,13 @@ public class CommentSection {
             }
             HashMap<String, Object> commentMap = (HashMap<String, Object>) commentObject;
             if(((String) commentMap.get("type")).equals("review")){
-                comms.add(ReviewComment.firebaseToReviewComment(commentMap));
+                comms.add(ReviewComment.firebaseToReviewComment(commentMap, cs));
             } else {
-                comms.add(GeneralComment.firebaseToGeneralComment(commentMap));
+                comms.add(GeneralComment.firebaseToGeneralComment(commentMap, cs));
             }
         }
         cs.comments = comms;
+        cs.parentFud = parentFud;
         return cs;
     }
 

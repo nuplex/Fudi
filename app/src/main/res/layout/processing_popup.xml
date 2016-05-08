@@ -12,7 +12,8 @@
         android:layout_gravity="center_horizontal|top"
         android:layout_marginTop="100dp"
         android:background="@drawable/comment_popup_background"
-        android:minHeight="125dp">
+        android:minHeight="125dp"
+        android:id="@+id/processing_popup_window">
 
         <TextView
             android:layout_width="120dp"

@@ -43,12 +43,11 @@ public class ReviewComment extends Comment {
      */
     public enum Rating{GREAT,OKAY,MEH,NO}
 
-    public static ReviewComment firebaseToReviewComment(HashMap<String, Object> hm){
+    public static ReviewComment firebaseToReviewComment(HashMap<String, Object> hm, CommentSection parent){
         String text = (String) hm.get("text");
         Rating r = Rating.valueOf((String) hm.get("rating"));
         String imgURL = (String) hm.get("imageURL");
         User whoPosted = User.getStandInUser((String) hm.get("userID"), (String) hm.get("username"));
-        CommentSection parent = null; //not actually needed
         ReviewComment rc = new ReviewComment(text, imgURL, r, whoPosted, parent);
         Vote v = rc.getVote();
         v.setUpvotes((long) hm.get("upvotes"));

@@ -149,6 +149,7 @@ public class User {
         Boolean fstTime = (Boolean) hm.get("firstTime");
         String pNum = (String) hm.get("phoneNumber");
         Boolean vrfd = (Boolean) hm.get("verified");
+        Boolean reg = (Boolean) hm.get("registered");
         Long fu = (Long) hm.get("fu");
         Date dateJoined = new Date((Long) hm.get("dateJoined"));
         User u = new User();
@@ -156,6 +157,7 @@ public class User {
         u.firstTime = fstTime;
         u.phoneNumber = pNum;
         u.verified = vrfd;
+        u.registered = reg;
         u.fu = fu;
         u.dateJoined = dateJoined;
         u.userID = (String) hm.get("userID");
