@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -239,12 +240,13 @@ public class FudiApp {
     }
 
     public TreeSet<FudDetail> pullFudsByTime(){
+
+        final CountDownLatch done = new CountDownLatch(1);
         (new AsyncTask<Void, Void,Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 final Firebase fudDetailsRef = firebase.child(FUDDETAILS);
                 Query query = fudDetailsRef.orderByChild("timestamp");
-                final AtomicBoolean done = new AtomicBoolean(false);
 
                 query.addChildEventListener(new
 
@@ -259,6 +261,7 @@ public class FudiApp {
                                     currentlyDisplayedFudDetails.add(fd);
                                 }
                             }
+                            done.countDown();
                         }
 
                         @Override
@@ -280,6 +283,7 @@ public class FudiApp {
                                 }
                                 currentlyDisplayedFudDetails.add(toAdd);
                             }
+                            done.countDown();
                         }
 
                         @Override
@@ -295,16 +299,18 @@ public class FudiApp {
                             if(found != null){
                                 currentlyDisplayedFudDetails.remove(found);
                             }
+                            done.countDown();
 
                         }
 
                         @Override
                         public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
+                            done.countDown();
                         }
 
                         @Override
                         public void onCancelled(FirebaseError firebaseError) {
+                            done.countDown();
                         }
                     }
 
@@ -312,6 +318,12 @@ public class FudiApp {
                 return  null;
             }
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        try {
+            done.await();
+        }catch (InterruptedException e){
+
+        }
 
         return currentlyDisplayedFudDetails;
     }

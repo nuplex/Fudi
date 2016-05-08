@@ -1,33 +1,25 @@
 package com.fudi.fudi.front;
 
 
-import android.content.ComponentName;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.internal.app.ToolbarActionBar;
 import android.util.Log;
-import android.view.DragEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Space;
 import android.widget.Toast;
@@ -42,9 +34,6 @@ import com.fudi.fudi.back.TestDatabase;
 import com.fudi.fudi.back.User;
 
 import java.util.TreeSet;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -141,14 +130,37 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         //liivt = new LoadImageInViewTask(fudViews, scroll);
 
         //liivt.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        (new AsyncTask<Void, Void, Void>(){
 
+
+        IntentFilter intentFilter = new IntentFilter("com.fudi.fudi.LISTUPDATED");
+        BroadcastReceiver rec = new BroadcastReceiver() {
             @Override
-            protected Void doInBackground(Void... params) {
-                FudiApp.getInstance().pullFudsByTime();
-                return null;
+            public void onReceive(Context context, Intent intent) {
+
+                Log.i("Broadcast", "Received Broadcast");
+                pull();
             }
-        }).execute();
+        };
+
+        registerReceiver(rec, intentFilter);
+
+
+                (new AsyncTask<Void, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        FudiApp.getInstance().pullFudsByTime();
+
+                        Intent intent = new Intent("com.fudi.fudi.LISTUPDATED");
+                        sendBroadcast(intent);
+
+                        Log.i("Broadcast", "Sent Broadcast");
+
+
+                        return null;
+
+                    }
+                }).execute();
 
         pull();
 
@@ -254,6 +266,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     public void pull(){
+        Log.i("Pull", "Pull called.");
         removeAll();
         TreeSet<FudDetail> fudDetails = FudiApp.getInstance().getCurrentlyDisplayedFudDetails();
         if(fudDetails == null){

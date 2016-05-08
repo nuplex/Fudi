@@ -30,6 +30,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.fudi.fudi.LISTUPDATED" />
+            </intent-filter>
+
         </activity>
         <activity
             android:name=".front.LoginActivity"
