@@ -44,12 +44,6 @@ public class Vote {
         }
     }
 
-    public void push(Voteable v){
-
-        // All the database interaction is done in the FudiApp class
-        // Grab an instance of it and let it update the Vote.
-        FudiApp.getInstance().updateVote(v);
-    }
 
     public long getNet(){
         return upvotes - downvotes;
@@ -77,5 +71,12 @@ public class Vote {
 
     public void setDownvotes(long downvotes) {
         this.downvotes = downvotes;
+    }
+
+    static public void push(Voteable v){
+
+        // All the database interaction is done in the FudiApp class
+        // Grab an instance of it and let it update the Vote.
+        FudiApp.getInstance().updateVote(v);
     }
 }

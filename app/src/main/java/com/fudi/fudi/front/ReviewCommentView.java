@@ -3,7 +3,6 @@ package com.fudi.fudi.front;
 import android.app.Service;
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 
 import com.fudi.fudi.R;
 import com.fudi.fudi.back.FudiApp;
-import com.fudi.fudi.back.GeneralComment;
 import com.fudi.fudi.back.ImageHandler;
 import com.fudi.fudi.back.ReviewComment;
 import com.fudi.fudi.back.Vote;
@@ -58,11 +56,11 @@ public class ReviewCommentView extends CommentView {
         ImageButton downvoteButton = (ImageButton) commentView.findViewById(R.id.review_comment_vote_downvote);
 
         upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
-                netVote, oneVotePressed, comment, comment.getParent().getParentFud().getFudID(),
+                netVote, oneVotePressed, comment, null, null,
                 comment.getWhoPosted().getUserID()));
         downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU,
                 upvoteButton, netVote, oneVotePressed, comment,
-                comment.getParent().getParentFud().getFudID(), comment.getWhoPosted().getUserID()));
+                null, null, comment.getWhoPosted().getUserID()));
 
         //Load in the image
         ImageView image = (ImageView) commentView.findViewById(R.id.review_comment_image);

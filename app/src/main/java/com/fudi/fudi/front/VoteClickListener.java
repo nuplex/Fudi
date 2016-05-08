@@ -4,10 +4,10 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.firebase.client.Firebase;
 import com.fudi.fudi.R;
 import com.fudi.fudi.back.Comment;
-import com.fudi.fudi.back.FudiApp;
+import com.fudi.fudi.back.Fud;
+import com.fudi.fudi.back.FudDetail;
 import com.fudi.fudi.back.Vote;
 
 /**
@@ -22,19 +22,21 @@ public class VoteClickListener implements View.OnClickListener {
     private boolean oneVotePressed;
     private ImageButton otherVote;
     private Comment comment;
-    private String fudID;
+    private Fud fud;
+    private FudDetail fudDetail;
     private String userID;
 
     public VoteClickListener(Vote vote, Vote.Type type, ImageButton otherVote,
                              TextView voteText, boolean ovp, Comment comment,
-                             String fudID, String userID){
+                             Fud fud, FudDetail fudDetail, String userID){
         this.voteText = voteText;
         this.type = type;
         this.vote = vote;
         this.oneVotePressed = ovp;
         this.otherVote = otherVote;
         this.comment = comment;
-        this.fudID = fudID;
+        this.fud = fud;
+        this.fudDetail = fudDetail;
         this.userID = userID;
 
 
@@ -64,6 +66,7 @@ public class VoteClickListener implements View.OnClickListener {
                     voteText.setText(Long.toString(vote.getNet()));
                     break;
             }
+            updateVote();
             otherVote.setClickable(false);
             oneVotePressed = true;
         } else {
@@ -87,6 +90,7 @@ public class VoteClickListener implements View.OnClickListener {
             oneVotePressed = false;
             otherVote.setClickable(true);
             voteText.setText(Long.toString(vote.getNet()));
+            updateVote();
         }
     }
 
@@ -99,5 +103,16 @@ public class VoteClickListener implements View.OnClickListener {
     /**
      * Pushes vote changes to the databse.
      */
+
+    public void updateVote() {
+        if(fud != null){
+            Vote.push(fud);
+        } else if(fudDetail != null){
+            Vote.push(fudDetail);
+        } else if(comment != null){
+            Vote.push(comment);
+        }
+    }
+
     public void push(){}
 }

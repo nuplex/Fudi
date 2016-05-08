@@ -453,6 +453,7 @@ public class FudiApp {
         final AtomicBoolean done = new AtomicBoolean(false);
 
         //TODO: First, push the changed vote data for this user
+        Log.i("VOTE:", "Entered updateVote()");
 
         if(v instanceof FudDetail){
             FudDetail fudDetail = (FudDetail) v;
@@ -464,21 +465,8 @@ public class FudiApp {
             votes.put("downvotes", fudDetail.getVote().getDownvotes());
             votes.put("upvotes", fudDetail.getVote().getUpvotes());
 
-            fudRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+            fudRef.updateChildren(votes);
 
-                    fudRef.setValue(votes);
-                    done.set(true);
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    done.set(true);
-                }
-            });
-
-            busyWaitOrTimeout(done);
         } else if(v instanceof Fud) {
             Fud fud = (Fud) v;
 
@@ -489,21 +477,9 @@ public class FudiApp {
             votes.put("downvotes", fud.getVote().getDownvotes());
             votes.put("upvotes", fud.getVote().getUpvotes());
 
-            fudRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+            fudRef.updateChildren(votes);
 
-                    fudRef.setValue(votes);
-                    done.set(true);
-                }
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    done.set(true);
-                }
-            });
-
-            busyWaitOrTimeout(done);
-        } else if(v instanceof Comment){
+        } else if(v instanceof Comment) {
             Comment comment = (Comment) v;
             CommentSection cSection = (CommentSection) comment.getParent();
             FudDetail fDetail = (FudDetail) cSection.getParentFud();
@@ -516,21 +492,7 @@ public class FudiApp {
             final Map<String, Object> votes = new TreeMap<String, Object>();
             votes.put("downvotes", fDetail.getVote().getDownvotes());
             votes.put("upvotes", fDetail.getVote().getUpvotes());
-            fudRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    fudRef.setValue(votes);
-                    done.set(true);
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    done.set(true);
-                }
-            });
-
-            busyWaitOrTimeout(done);
+            fudRef.updateChildren(votes);
         }
 
         return;

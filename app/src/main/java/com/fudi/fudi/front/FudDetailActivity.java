@@ -1,15 +1,8 @@
 package com.fudi.fudi.front;
 
-import android.app.Activity;
-import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.ColorDrawable;
-import android.inputmethodservice.Keyboard;
-import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,14 +12,10 @@ import android.provider.MediaStore;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -39,7 +28,6 @@ import android.widget.Toast;
 import com.firebase.client.Firebase;
 import com.fudi.fudi.R;
 import com.fudi.fudi.back.Comment;
-import com.fudi.fudi.front.FudCreationActivity;
 import com.fudi.fudi.back.CommentSection;
 import com.fudi.fudi.back.Fud;
 import com.fudi.fudi.back.FudDetail;
@@ -47,10 +35,7 @@ import com.fudi.fudi.back.FudiApp;
 import com.fudi.fudi.back.GeneralComment;
 import com.fudi.fudi.back.ImageHandler;
 import com.fudi.fudi.back.ReviewComment;
-import com.fudi.fudi.back.TestDatabase;
 import com.fudi.fudi.back.Vote;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,11 +113,11 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
         ImageButton downvoteButton = (ImageButton) findViewById(R.id.fud_detail_downvote_button);
 
         upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
-                netVote, oneVotePressed, null, fudDetail.getFudID(),
+                netVote, oneVotePressed, null, null, fudDetail,
                 fudDetail.getWhoPosted().getUserID()));
         downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU,
-                upvoteButton, netVote, oneVotePressed, null,
-                fudDetail.getFudID(), fudDetail.getWhoPosted().getUserID()));
+                upvoteButton, netVote, oneVotePressed, null, null,
+                fudDetail, fudDetail.getWhoPosted().getUserID()));
 
         //Load in the image
         ImageView image = (ImageView) findViewById(R.id.fud_detail_dish);

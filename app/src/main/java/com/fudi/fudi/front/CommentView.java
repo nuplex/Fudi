@@ -12,7 +12,6 @@ import com.fudi.fudi.R;
 import com.fudi.fudi.back.Comment;
 import com.fudi.fudi.back.FudiApp;
 import com.fudi.fudi.back.GeneralComment;
-import com.fudi.fudi.back.ReviewComment;
 import com.fudi.fudi.back.Vote;
 
 import java.util.Comparator;
@@ -57,11 +56,11 @@ public class CommentView extends View implements Comparable<CommentView>{
         ImageButton downvoteButton = (ImageButton) commentView.findViewById(R.id.comment_vote_downvote);
 
         upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
-                netVote, oneVotePressed, comment, comment.getParent().getParentFud().getFudID(),
+                netVote, oneVotePressed, comment, null, null,
                 comment.getWhoPosted().getUserID()));
         downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU,
                 upvoteButton, netVote, oneVotePressed, comment,
-                comment.getParent().getParentFud().getFudID(), comment.getWhoPosted().getUserID()));
+                null, null, comment.getWhoPosted().getUserID()));
     }
 
     /**
