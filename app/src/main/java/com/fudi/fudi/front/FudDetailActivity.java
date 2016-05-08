@@ -145,7 +145,7 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
         //Comment Handling
         commentList = (LinearLayout) findViewById(R.id.fud_detail_comment_section);
 
-
+        fudDetail.setLocationOfRestaurant(fudDetail.getRestaurant());
         pull();
 
 

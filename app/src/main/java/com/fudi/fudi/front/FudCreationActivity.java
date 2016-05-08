@@ -1,11 +1,16 @@
 package com.fudi.fudi.front;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationManager;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -15,6 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.UiThread;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -64,6 +70,9 @@ public class FudCreationActivity extends AppCompatActivity {
     private Button submitButton;
     private Uri imagePath;
 
+    private LocationManager locationManager;
+    private Location location;
+
     private MinMaxTextWatcher<EditText> dmmtw;
     private MinMaxTextWatcher<EditText> rmmtw;
     private MinMaxTextWatcher<EditText> demmtw;
@@ -85,8 +94,19 @@ public class FudCreationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fud_creation);
-        Firebase.setAndroidContext(getApplicationContext());
 
+        locationManager = FudiApp.getInstance().FudiLocationManager(getApplicationContext());
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            /*TODO:
+                Implement permission request if Location permission is not accessible
+             */
+        }
+
+        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        Toast.makeText(getApplicationContext(), Double.toString(location.getLatitude()) + " " +
+                Double.toString(location.getLongitude()), Toast.LENGTH_LONG).show();
 
         flexSpaceShrunkAndMainShown = false;
 
@@ -433,6 +453,8 @@ public class FudCreationActivity extends AppCompatActivity {
 
                        final FudDetail fudDetail = new FudDetail(imageURL, dishName, restName, costText,
                                 descText, FudiApp.getInstance().getThisUser(), "");
+                        //Used for testing Yelp
+                        fudDetail.setLocationPosted(location);
 
                         //Upload the FudDetail to the database
                         /**

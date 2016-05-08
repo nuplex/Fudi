@@ -13,7 +13,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.internal.app.ToolbarActionBar;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;

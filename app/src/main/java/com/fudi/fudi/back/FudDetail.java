@@ -4,15 +4,29 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
+
+import com.yelp.clientlib.connection.YelpAPI;
+import com.yelp.clientlib.connection.YelpAPIFactory;
+import com.yelp.clientlib.entities.Business;
+import com.yelp.clientlib.entities.Coordinate;
+import com.yelp.clientlib.entities.SearchResponse;
+import com.yelp.clientlib.entities.options.BoundingBoxOptions;
+import com.yelp.clientlib.entities.options.CoordinateOptions;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Represents the details and comment section presented on the FudDetail Screen.
@@ -53,6 +67,10 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
     private Date timestamp;
 
     private static final String PREFIX = "FD";
+    private static final String CONSUMER_KEY = "GLhURiiDX46ZB3fmFy_dqA";
+    private static final String CONSUMER_SECRET = "4Ncrn9Lq0P2vW4plsuzrhaj_kZM";
+    private static final String TOKEN = "ihjKiuUnlDa5K6_wYBTiX3S2AL7S4Gzu";
+    private static final String TOKEN_SECRET = "C5MqD0DXgXlMmREVtPvvp4jsdrA";
 
     public FudDetail(){fudID = genarateID();}
 
@@ -105,6 +123,42 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
     public void setLocationOfRestaurant(String restaurant) {
         //TODO: If possible, access Yelp for this restaurant and get it's location (lat/long)
         //Should be done asynchronously
+        YelpAPIFactory apiFactory = new YelpAPIFactory(CONSUMER_KEY, CONSUMER_SECRET, TOKEN,
+                TOKEN_SECRET);
+        YelpAPI yelpAPI = apiFactory.createAPI();
+
+        Map<String, String> resturantParams = new HashMap<>();
+
+        resturantParams.put("term", restaurant);
+        resturantParams.put("limit", "5");
+
+
+        CoordinateOptions coordinate = CoordinateOptions.builder()
+                .latitude(getLocationPosted().getLatitude())
+                .longitude(getLocationPosted().getLongitude()).build();
+        Log.i("TAG", getLocationPosted().toString() + " " + getLocationPosted().toString());
+        Call<SearchResponse> call = yelpAPI.search(coordinate, resturantParams);
+
+        Callback<SearchResponse> callback = new Callback<SearchResponse>() {
+            @Override
+            public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
+                ArrayList<Business> businesses = response.body().businesses();
+
+                for(Business b: businesses) {
+                    /*
+                      TODO
+                     * Just have to determine how we want to
+                     */
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SearchResponse> call, Throwable t) {
+
+            }
+        };
+
+        call.enqueue(callback);
     }
 
     /**
@@ -114,6 +168,13 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
      */
     public void setLocationOfRestaurant(Location locationOfRestaurant) {
         this.locationOfRestaurant = locationOfRestaurant;
+    }
+
+    /**
+     * Sets location Fud was posted
+     */
+    public void setLocationPosted(Location locationPosted) {
+        this.locationPosted = locationPosted;
     }
 
     /**
