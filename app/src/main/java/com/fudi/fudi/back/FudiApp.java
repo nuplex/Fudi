@@ -2,6 +2,7 @@ package com.fudi.fudi.back;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 
@@ -11,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
@@ -53,20 +55,29 @@ public class FudiApp {
 
     private static final String SERVER_LOCATION = "https://fudiapp.firebaseio.com/";
     public static final String USERS = "users";
+    public static final String USERNAMES = "usernames";
+    public static final String PHONENUMBERS = "phoneNumbers";
     public static final String FUDDETAILS = "fudDetails";
     public static final String COMMENTS = "comments";
+    public static final String NOTIFICATIONS = "notifications";
     private static final int TIMEOUT = 10000;
 
     private static final int DEFAULT_FUD_PULL_NUM = 25;
 
     private User thisUser;
     private String thisUsersID;
+    private String currentVerifyCode;
 
     private FudDetail currentFudDetailToDisplay = null;
     private Fud currentOperatingFud = null;
     private FudDetail currentOperatingFudDetail = null;
     private CommentSection currentOperatingCommentSection = null;
     private TreeSet<FudDetail> currentlyDisplayedFudDetails = new TreeSet<FudDetail>();
+    private TreeSet<FudiNotification> currentOperatingNotifications = new TreeSet<FudiNotification>();
+    private boolean childEventActive = false;
+
+    private AtomicBoolean found = new AtomicBoolean(true);
+
 
     public boolean alreadyDidLogin = false;
 
@@ -137,22 +148,19 @@ public class FudiApp {
                 if(!dataSnapshot.getValue().equals("test")) {
                     currentFudDetailToDisplay =
                             FudDetail.firebaseToFudDetail((HashMap<String, Object>) dataSnapshot.getValue());
-                    done.set(true);
                 }
             }
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
-                done.set(true);
+
             }
         });
-
-        busyWaitOrTimeout(done);
 
         return currentFudDetailToDisplay;
     }
 
-    public CommentSection pullCommentSectionForFudDetail(String fudId) {
+   /* public CommentSection pullCommentSectionForFudDetail(String fudId) {
         final Firebase fudDetailCommentsRef = firebase.child(FUDDETAILS).child(fudId).child(COMMENTS);
         final AtomicBoolean done = new AtomicBoolean(false);
         fudDetailCommentsRef.addValueEventListener(new ValueEventListener() {
@@ -171,9 +179,10 @@ public class FudiApp {
         });
 
         return currentOperatingCommentSection;
-    }
+    } */
 
 
+    @Deprecated
     public Fud pullFud(String fudId){
         final Firebase fudDetailRef = firebase.child(FUDDETAILS).child(fudId);
         final AtomicBoolean done = new AtomicBoolean(false);
@@ -226,17 +235,37 @@ public class FudiApp {
                         @Override
                         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                             if(dataSnapshot.getKey().equals("test")){return;}
+                            FudDetail found = null;
+                            FudDetail toAdd = null;
                             for(FudDetail fd : currentlyDisplayedFudDetails){
                                 if(fd.getFudID().equals(dataSnapshot.getKey())){
-                                    fd = FudDetail.firebaseToFudDetail(
+                                    found = fd;
+                                    toAdd = FudDetail.firebaseToFudDetail(
                                             (HashMap<String, Object>)dataSnapshot.getValue());
                                     break;
                                 }
+                            }
+                            if(toAdd != null){
+                                if(found != null){
+                                    currentlyDisplayedFudDetails.remove(found);
+                                }
+                                currentlyDisplayedFudDetails.add(toAdd);
                             }
                         }
 
                         @Override
                         public void onChildRemoved(DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.getKey().equals("test")){return;}
+                            FudDetail found = null;
+                            for(FudDetail fd : currentlyDisplayedFudDetails){
+                                if(fd.getFudID().equals(dataSnapshot.getKey())){
+                                    found = fd;
+                                    break;
+                                }
+                            }
+                            if(found != null){
+                                currentlyDisplayedFudDetails.remove(found);
+                            }
 
                         }
 
@@ -335,7 +364,7 @@ public class FudiApp {
                 }
             });
 
-            busyWaitOrTimeout(done);
+            //busyWaitOrTimeout(done);
 
             if (thisUser == null) {
                 return TestDatabase.getInstance().getTestUser();
@@ -347,8 +376,181 @@ public class FudiApp {
         }
     }
 
+    public void getUsersFuds(String userID){
+
+    }
+
+    public void getCommentedOnFudsForUser(String userID){
+
+    }
+
+    public TreeSet<FudiNotification> getNotifications(){
+        Firebase notifRef = firebase.child(USERS).child(NOTIFICATIONS);
+        Query notifs = notifRef.orderByKey();
+        notifs.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(!dataSnapshot.getKey().equals("test")){
+                    FudiNotification fn = FudiNotification.fromFirebaseToFudiNotification(
+                            (HashMap<String, Object>) dataSnapshot.getValue());
+                    if (fn != null) {
+                        currentOperatingNotifications.add(fn);
+                    }
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {}
+        });
+
+
+        return currentOperatingNotifications;
+    }
+
     public void loadInThisID(String userID){
         thisUsersID = userID;
+    }
+
+
+    public String generateAndSendCode(String phoneNumber){
+        final String code = generateCode();
+        final Firebase userRef = firebase.child(USERS).child(thisUser.getUserID());
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild("verifyCode")) {
+                    userRef.child("verifyCode").setValue(code);
+                    currentVerifyCode = code;
+                } else {
+                    userRef.child("verifyCode").push();
+                    userRef.child("verifyCode").setValue(code);
+                    currentVerifyCode = code;
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+        SmsManager smsManager = SmsManager.getDefault();
+        smsManager.sendTextMessage(phoneNumber, null, "Fudi Registration Code: "+code, null, null);
+
+        return code;
+    }
+
+    public boolean verifyCode(final String code){
+        Firebase userCode = firebase.child(USERS).child(thisUser.getUserID()).child("verifyCode");
+        final AtomicBoolean done = new AtomicBoolean(false);
+        userCode.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //if(dataSnapshot.getValue().equals(code)){
+                currentVerifyCode = (String) dataSnapshot.getValue();
+                //}
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
+        if(currentVerifyCode == null){
+            return false;
+        } else {
+            if(currentVerifyCode.equals(code)){
+                return true;
+            }
+            return  false;
+        }
+    }
+
+    /**
+     *
+     * @return True if username is available, false otherwise
+     */
+    public boolean checkUsernameAvailability(final String username){
+        Firebase usernameRef = firebase.child(USERNAMES);
+        usernameRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild(username)){
+                    found.set(true);
+                } else {
+                    found.set(false);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+        return !found.get();
+    }
+
+    public boolean checkPhoneNumberInUse(final String phoneNumber){
+        final Firebase phoneNumberRef = firebase.child(PHONENUMBERS);
+        final AtomicBoolean found = new AtomicBoolean(true);
+        phoneNumberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild(phoneNumber)) {
+                    found.set(true);
+                } else {
+                    found.set(false);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                found.set(false);
+            }
+        });
+
+        return !found.get();
+    }
+
+    public boolean registerThisUser(final String username, final String phoneNumber){
+            final Firebase usernameRef = firebase.child(USERNAMES);
+            final AtomicBoolean success = new AtomicBoolean(false);
+            usernameRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    thisUsersID = thisUser.getUserID();
+                    usernameRef.child(username).push();
+                    usernameRef.child(username).child("username").push();
+                    usernameRef.child(username).child("username").setValue(username);
+                    usernameRef.child(username).child("userID").push();
+                    usernameRef.child(username).child("userID").setValue(thisUser.getUsername());
+                    Firebase userRef = firebase.child(USERS).child(thisUsersID);
+                    userRef.child("username").setValue(username);
+                    userRef.child("registered").setValue(true);
+                    userRef.child("verified").setValue(true);
+                    userRef.child("phoneNumber").setValue(phoneNumber);
+                    firebase.child(PHONENUMBERS).child(phoneNumber).child("userID").push();
+                    firebase.child(PHONENUMBERS).child(phoneNumber).child("userID").setValue(thisUsersID);
+                    userRef.child("firstTime").setValue(false);
+                    success.set(true);
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    success.set(false);
+
+                }
+            });
+            return success.get();
     }
 
     public static String getTimeSincePostedString(Date time){
@@ -365,7 +567,11 @@ public class FudiApp {
             return diff + " hr ago";
         } else if (diff < 604800){ //604800 is 7 days
             diff = Math.round(diff/86400);
-            return diff + " days ago";
+            if(diff == 1) {
+                return diff + " day ago";
+            } else {
+                return diff + " days ago";
+            }
         } else {
             return getFormattedTime(time);
         }
@@ -388,6 +594,28 @@ public class FudiApp {
      * @param done
      * @return whether exited naturally (true) or timed out/an error occured (false)
      */
+    public boolean busyWaitOrTimeout(AtomicBoolean done, long ms){
+        int waitTime = 100;
+        int waited = 0;
+        while(!done.get()){
+            if(waited >= ms){
+                return false;
+            }
+
+            synchronized (this) {
+                try {
+                    this.wait(waitTime);
+                } catch (InterruptedException e){
+                    return false;
+                }
+            }
+            waited += waitTime;
+
+        }
+        Log.d("WAITED", Integer.toString(waited));
+        return true;
+    }
+
     public boolean busyWaitOrTimeout(AtomicBoolean done){
         int waitTime = 100;
         int waited = 0;
@@ -438,6 +666,12 @@ public class FudiApp {
         return id.toString();
     }
 
+    private static String generateCode(){
+        SecureRandom r = new SecureRandom();
+        String code = Integer.toString(r.nextInt(900000) + 100000);
+        return code;
+    }
+
     public Fud getCurrentOperatingFud() {
         return currentOperatingFud;
     }
@@ -446,9 +680,17 @@ public class FudiApp {
         return currentOperatingFudDetail;
     }
 
+    public TreeSet<FudiNotification> getCurrentOperatingNotifications() {
+        return currentOperatingNotifications;
+    }
+
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        try {
+            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        } catch (NullPointerException e){
+            e.printStackTrace();
+        }
     }
 
     public Firebase getFirebase() {

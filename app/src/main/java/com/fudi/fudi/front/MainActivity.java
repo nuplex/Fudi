@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         });
 
         scroll = (ScrollView) findViewById(R.id.main_scrollview);
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(this);
 
         if(!networkCheck()){
             return;
@@ -104,6 +106,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         if(!sharedPref.contains("firstTime")){
             sharedPref.edit().putString("firstTime", "true").commit();
         }
+
+        if(!sharedPref.contains("registered")){
+            sharedPref.edit().putString("registered", "false").commit();
+        }
+
         String firstTime = sharedPref.getString("firstTime", "false");
         FudiApp.getInstance().loadInThisID(sharedPref.getString("userID", "notfound"));
 
@@ -112,9 +119,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             if(!FudiApp.getInstance().alreadyDidLogin){
                 FudiApp.getInstance().getThisUser();
                 gotUser = true;
-                FudiApp.getInstance().alreadyDidLogin = true;
-                Intent reg = new Intent(this, LoginActivity.class);
-                startActivity(reg);
+                if(!FudiApp.getInstance().getThisUser().isRegistered()) {
+                    FudiApp.getInstance().alreadyDidLogin = true;
+                    Intent reg = new Intent(this, LoginActivity.class);
+                    startActivity(reg);
+                }
             }
         }
 
@@ -143,8 +152,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         pull();
 
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setOnRefreshListener(this);
 
     }
 
@@ -210,7 +217,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         //noinspection SimplifiableIfStatement
         switch(id) {
             case R.id.action_location_here:
-                // TODO not sure what this is supposed to do
+                Intent h = new Intent(MainActivity.this, LocationPickActivity.class);
+                startActivity(h);
                 return true;
             case R.id.fudi_action_user_account:
                 Intent i = new Intent(MainActivity.this, MeActivity.class);
@@ -316,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      */
     public void refreshWithAtTop(Fud fud){
         removeAll();
-        addFudsToList(TestDatabase.getInstance().getFuds()); //TODO get from real database
+        addFudsToList(TestDatabase.getInstance().getFuds());
         displayWithAtTop(fud);
     }
 
@@ -350,8 +358,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      * logic there, and add it to fudList (fudList is the one that is being scrolled).
      *
      *
-     * the amount. This will get new Fuds which you will have to replace into the fudList
-     * (just fudList.add(...);)
      */
     @Override
     public void onRefresh() {

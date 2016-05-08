@@ -85,17 +85,21 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
         String fudID = getIntent().getStringExtra(Fud.EXTRA_TAG_ID);
 
         comments = new TreeSet<CommentView>();
-        for(FudDetail fd : FudiApp.getInstance().getCurrentlyDisplayedFudDetails()){
-            if(fd.getFudID().equals(fudID)){
-                fudDetail = fd;
-                break;
+        if(getIntent().hasExtra(NotificationView.FROM_NOTIFICATION)){
+            FudDetail fd = FudiApp.getInstance().pullFudDetail(fudID);
+            if(fd == null){
+                Toast.makeText(this, "There was an error getting the fud :(", Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+        } else {
+            for (FudDetail fd : FudiApp.getInstance().getCurrentlyDisplayedFudDetails()) {
+                if (fd.getFudID().equals(fudID)) {
+                    fudDetail = fd;
+                    break;
+                }
             }
         }
-        /**
-         * TODO: replace with that line when database is working
-         *
-         * fudDetail = FudiApp.pullFudDetail(fudID)
-         */
 
         Vote vote = fudDetail.getVote();
         boolean oneVotePressed = false; //TODO; this actually needs to be gotten from the database :( or stored in the comment
@@ -160,6 +164,8 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
     }
+
+
 
     @Override
     public void onBackPressed() {
@@ -347,7 +353,7 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
     @Override
     public void onRefresh() {
         swipeRefreshLayout.setRefreshing(true);
-        pull();
+        refresh();
         swipeRefreshLayout.setRefreshing(false);
     }
 

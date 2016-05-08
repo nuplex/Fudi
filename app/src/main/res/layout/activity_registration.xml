@@ -1,0 +1,139 @@
+ <FrameLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/register_frame_layout">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.fudi.fudi.front.RegistrationActivity"
+            android:orientation="vertical"
+            android:id="@+id/register_layout">
+
+        <Space
+            android:layout_width="1dp"
+            android:layout_height="20dp" />
+
+            <EditText
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/register_phone_number"
+            android:layout_gravity="center_horizontal"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:hint="phone number"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:inputType="phone" />
+
+        <Button
+            android:layout_width="140dp"
+            android:layout_height="40dp"
+            android:text="Send Code"
+            android:id="@+id/register_send_code_button"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/blue_button"
+            android:textColor="@color/default_text_color"
+            android:textSize="18sp"
+            android:layout_marginTop="10dp"
+            android:enabled="true"
+            android:layout_marginBottom="15dp" />
+
+        <EditText
+            android:layout_width="180dp"
+            android:layout_height="60dp"
+            android:id="@+id/register_code_input"
+            android:layout_gravity="center_horizontal"
+            android:autoText="false"
+            android:background="@drawable/blue_multiline_textentry"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:textSize="34sp"
+            android:textColor="#000000"
+            android:layout_marginTop="15dp"
+            android:enabled="false"
+            android:textAlignment="center"
+            android:inputType="number"
+            android:gravity="center_vertical|center_horizontal"
+            android:maxLength="8" />
+
+        <Button
+            android:layout_width="140dp"
+            android:layout_height="40dp"
+            android:text="Enter Code"
+            android:id="@+id/register_enter_code_button"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/blue_button"
+            android:textColor="@color/default_text_color"
+            android:textSize="18sp"
+            android:layout_marginTop="10dp"
+            android:enabled="false"
+            android:layout_marginBottom="15dp" />
+
+        <EditText
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/register_username_input"
+            android:layout_gravity="center_horizontal"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:hint="username"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:enabled="false"
+            android:singleLine="true"
+            android:inputType="textPersonName"
+            android:maxLength="16" />
+
+        <Button
+            android:layout_width="140dp"
+            android:layout_height="40dp"
+            android:text="Check"
+            android:id="@+id/register_username_button"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/blue_button"
+            android:textColor="@color/default_text_color"
+            android:textSize="18sp"
+            android:layout_marginTop="10dp"
+            android:singleLine="true"
+            android:enabled="false" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/register_username_availability_text"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:textSize="16sp" />
+
+        <Button
+            android:layout_width="180dp"
+            android:layout_height="60dp"
+            android:text="Register!"
+            android:id="@+id/register_register_button"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/standard_button"
+            android:layout_marginTop="15dp"
+            android:textColor="@color/default_text_color"
+            android:textSize="25sp"
+            android:enabled="false" />
+
+        </LinearLayout>
+
+     <ProgressBar
+         style="?android:attr/progressBarStyleLarge"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:id="@+id/register_progress_bar"
+         android:layout_gravity="right|top"
+         android:layout_marginTop="15dp"
+         android:layout_marginRight="15dp"
+         android:indeterminate="true"
+         android:visibility="invisible"
+         android:indeterminateBehavior="cycle"
+         android:indeterminateOnly="true" />
+
+ </FrameLayout>

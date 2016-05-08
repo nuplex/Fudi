@@ -1,9 +1,108 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.fudi.fudi.front.MeActivity">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.fudi.fudi.front.MeActivity"
+    android:gravity="center_vertical|center_horizontal"
+    android:id="@+id/me_layout">
 
-</RelativeLayout>
+    <Button
+        android:layout_width="180dp"
+        android:layout_height="60dp"
+        android:text="Register"
+        android:id="@+id/me_register_button"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/blue_button"
+        android:textColor="@color/default_text_color"
+        android:textSize="25sp"
+        android:enabled="true"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/me_info_holder"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="username"
+            android:id="@+id/me_username"
+            android:layout_marginTop="40dp"
+            android:textSize="28sp"
+            android:textColor="@color/fudi_text_color"
+            android:textStyle="bold"
+            android:singleLine="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00"
+            android:id="@+id/me_fu"
+            android:textSize="21sp"
+            android:layout_marginBottom="35dp"
+            android:textColor="@color/secondary_color_darker" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|center_horizontal"
+            android:id="@+id/me_button_holder">
+
+            <Button
+                android:layout_width="135dp"
+                android:layout_height="40dp"
+                android:text="My Fuds"
+                android:textAllCaps="false"
+                android:id="@+id/me_my_fuds_button"
+                android:textSize="17sp"
+                android:textColor="@color/common_google_signin_btn_text_dark_default"
+                android:background="@drawable/blue_button" />
+
+            <Space
+                android:layout_width="40dp"
+                android:layout_height="1dp" />
+
+            <Button
+                android:layout_width="135dp"
+                android:layout_height="40dp"
+                android:text="Replied To"
+                android:textAllCaps="false"
+                android:id="@+id/me_my_commented_on_button"
+                android:textSize="17sp"
+                android:textColor="@color/common_google_signin_btn_text_dark_default"
+                android:background="@drawable/blue_button" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Notifications"
+            android:id="@+id/me_notifications_label"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:layout_marginTop="25dp"
+            android:textSize="20sp"
+            android:textColor="@color/secondary_color_darker2"
+            android:background="@color/secondary_color" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/me_scrollview"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/fud_background_hold_color">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal"
+                android:id="@+id/me_notification_list"></LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+</LinearLayout>

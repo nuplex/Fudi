@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <EditTextPreference android:title="Your Name"
+    <!-- <EditTextPreference android:title="Your Name"
         android:key="username"
         android:summary="Please provide your username"></EditTextPreference>
     <CheckBoxPreference android:title="Application Updates"
@@ -14,5 +14,5 @@
         android:key="downloadType"
         android:defaultValue="1"
         android:entries="@array/listArray"
-        android:entryValues="@array/listValues" />
+        android:entryValues="@array/listValues" /> -->
 </PreferenceScreen>
