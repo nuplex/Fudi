@@ -44,21 +44,6 @@ public class Vote {
         }
     }
 
-    public void push(Voteable v){
-        //TODO: First, push the changed vote data for this user
-
-        if(v instanceof FudDetail){
-            FudDetail fudDetail = (FudDetail) v;
-            //TODO: Update the fud detail
-        } else if(v instanceof Fud) {
-            Fud fud = (Fud) v;
-            //TODO: Update the fud detail associated with Fud
-        } else if(v instanceof Comment){
-            Comment comment = (Comment) v;
-            //Need to discriminate between a GeneralComment and ReviewComment
-            //TODO: Don't worry about this yet, or, you can. Same as above just storing the vote data.
-        }
-    }
 
     public long getNet(){
         return upvotes - downvotes;
@@ -86,5 +71,12 @@ public class Vote {
 
     public void setDownvotes(long downvotes) {
         this.downvotes = downvotes;
+    }
+
+    static public void push(Voteable v){
+
+        // All the database interaction is done in the FudiApp class
+        // Grab an instance of it and let it update the Vote.
+        FudiApp.getInstance().updateVote(v);
     }
 }

@@ -3,7 +3,6 @@ package com.fudi.fudi.back;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
@@ -18,6 +17,7 @@ public abstract class Comment implements Comparable<Comment>, Voteable {
     private CommentSection parent;
     private Date timestamp;
     private Vote vote;
+    private long commentNumber;
 
     public Comment(){}
 
@@ -27,6 +27,15 @@ public abstract class Comment implements Comparable<Comment>, Voteable {
         this.parent = parent;
         timestamp = Calendar.getInstance().getTime();
         vote = new Vote(whoPosted.getUserID());
+        commentNumber = -1;
+    }
+
+    public void setCommentNumber(long l){
+        commentNumber = l;
+    }
+
+    public long getCommentNumber(){
+        return commentNumber;
     }
 
     public String getText() {
