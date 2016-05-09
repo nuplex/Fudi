@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -29,27 +30,25 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="com.fudi.fudi.LISTUPDATED" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".front.LoginActivity"
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Login"></activity>
+            android:theme="@style/AppTheme.Login" />
         <activity
             android:name=".front.MeActivity"
-            android:label="@string/title_activity_me"></activity>
+            android:label="@string/title_activity_me" />
         <activity
             android:name=".front.SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings" />
         <activity
             android:name=".front.FudDetailActivity"
             android:label="@string/title_activity_fud_detail"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".front.FudCreationActivity"
             android:label="@string/title_activity_fud_creation"
@@ -64,24 +63,25 @@
         </activity>
         <activity
             android:name=".front.RegistrationActivity"
-            android:label="@string/title_activity_registration" >
-        </activity>
+            android:label="@string/title_activity_registration"></activity>
         <activity
             android:name=".front.FudListActivity"
-            android:label="@string/title_activity_fud_list" >
-        </activity>
+            android:label="@string/title_activity_fud_list"></activity>
         <activity
             android:name=".front.LocationPickActivity"
-            android:label="@string/title_activity_location_pick" >
-        </activity>
+            android:label="@string/title_activity_location_pick"></activity>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBFygNzLzd-RQ0UhY4SNA6dKBK6GVmkHgo"/>
-
+            android:value="AIzaSyBFygNzLzd-RQ0UhY4SNA6dKBK6GVmkHgo" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <service
+            android:name=".back.NotificationService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

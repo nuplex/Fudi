@@ -398,13 +398,25 @@ public class FudiApp {
         CommentSection cs = comment.getParent();
         Iterator<Comment> comments = cs.getComments().iterator();
         FudDetail fd = comment.getParent().getParentFud();
-        FudiNotification fn = new FudiNotification(fd.getDishName(), fd.getFudID(),
+
+        FudiNotification fudNotify = new FudiNotification(fd.getDishName(), fd.getFudID(),
+                comment.getTimestamp(), false, FudiNotification.NotificationType.FUD_POST);
+
+        FudiNotification commentNotify = new FudiNotification(fd.getDishName(), fd.getFudID(),
                 comment.getTimestamp(), false, FudiNotification.NotificationType.COMMENTED_ON);
 
-        HashMap<String, Object> notification = fn.toFirebase();
+        HashMap<String, Object> notification = fudNotify.toFirebase();
         HashMap<String, Boolean> alreadyNotified = new HashMap<String, Boolean>();
 
         Firebase notificationRef = firebase.child(USERS);
+
+        if(alreadyNotified.get(fd.getWhoPosted().getUsername()) == null) {
+            Firebase thisNotifyRef = notificationRef.child(fd.getWhoPosted().getUserID()).child(NOTIFICATIONS);
+            thisNotifyRef.push().setValue(notification);
+            alreadyNotified.put(fd.getWhoPosted().getUsername(), true);
+        }
+
+        notification = commentNotify.toFirebase();
 
         while(comments.hasNext()){
             Comment c = comments.next();
@@ -412,14 +424,9 @@ public class FudiApp {
 
             if (alreadyNotified.get(username) == null) {
                 alreadyNotified.put(username, true);
-                Firebase thisNotifyRef = notificationRef.child(c.getWhoPosted().getUserID()).child("notifications");
+                Firebase thisNotifyRef = notificationRef.child(c.getWhoPosted().getUserID()).child(NOTIFICATIONS);
                 thisNotifyRef.push().setValue(notification);
             }
-        }
-
-        if(alreadyNotified.get(fd.getWhoPosted().getUsername()) == null) {
-            Firebase thisNotifyRef = notificationRef.child(fd.getWhoPosted().getUserID()).child("notifications");
-            thisNotifyRef.push().setValue(notification);
         }
 
         return;

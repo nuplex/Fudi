@@ -36,6 +36,7 @@ import com.fudi.fudi.back.FudDetail;
 import com.fudi.fudi.back.FudiApp;
 import com.fudi.fudi.back.GeoArea;
 import com.fudi.fudi.back.ImageHandler;
+import com.fudi.fudi.back.NotificationService;
 import com.fudi.fudi.back.TestDatabase;
 import com.fudi.fudi.back.User;
 
@@ -185,6 +186,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                     }
                 }).execute();
+
+
+        //Start the Notification Service.
+        Intent intent = new Intent(this, NotificationService.class);
+        intent.putExtra("userID", FudiApp.getInstance().getThisUser().getUserID());
+        startService(intent);
 
     }
 
