@@ -2,8 +2,6 @@ package com.fudi.fudi.front;
 
 
 import android.Manifest;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -187,9 +185,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                     }
                 }).execute();
-
-        pull();
-
 
     }
 

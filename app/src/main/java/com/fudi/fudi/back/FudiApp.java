@@ -1,21 +1,15 @@
 package com.fudi.fudi.back;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -23,10 +17,6 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
-import com.firebase.client.core.utilities.Tree;
-import com.fudi.fudi.front.MainActivity;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -37,11 +27,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+//import com.google.android.gms.location.LocationServices;
 
 /**
  * Represents the app in of itself, mostly is needed for backend connections and total app
@@ -349,7 +342,7 @@ public class FudiApp {
         fudRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChild(fudID)){
+                if (dataSnapshot.hasChild(fudID)) {
                     //update
                     fudRef.child(fudID).setValue(fudDetail.toFirebase());
                 } else {
@@ -372,6 +365,7 @@ public class FudiApp {
     public void pushCommentForFudDetail(String fudID, final Comment comment){
         final Firebase fudDetailCommentsRef = firebase.child(FUDDETAILS).child(fudID).child(COMMENTS);
         final AtomicBoolean done = new AtomicBoolean(false);
+
         fudDetailCommentsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -388,8 +382,51 @@ public class FudiApp {
             }
         });
 
+        (new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                pushNotifications(comment);
+                return null;
+            }
+        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
         busyWaitOrTimeout(done);
     }
+
+    public void pushNotifications(Comment comment){
+
+        CommentSection cs = comment.getParent();
+        Iterator<Comment> comments = cs.getComments().iterator();
+        FudDetail fd = comment.getParent().getParentFud();
+        FudiNotification fn = new FudiNotification(fd.getDishName(), fd.getFudID(),
+                comment.getTimestamp(), false, FudiNotification.NotificationType.COMMENTED_ON);
+
+        HashMap<String, Object> notification = fn.toFirebase();
+        HashMap<String, Boolean> alreadyNotified = new HashMap<String, Boolean>();
+
+        Firebase notificationRef = firebase.child(USERS);
+
+        while(comments.hasNext()){
+            Comment c = comments.next();
+            String username = c.getWhoPosted().getUsername();
+
+            if (alreadyNotified.get(username) == null) {
+                alreadyNotified.put(username, true);
+                Firebase thisNotifyRef = notificationRef.child(c.getWhoPosted().getUserID()).child("notifications");
+                thisNotifyRef.push().setValue(notification);
+            }
+        }
+
+        if(alreadyNotified.get(fd.getWhoPosted().getUsername()) == null) {
+            Firebase thisNotifyRef = notificationRef.child(fd.getWhoPosted().getUserID()).child("notifications");
+            thisNotifyRef.push().setValue(notification);
+        }
+
+        return;
+    }
+
+
+
 
     public User getThisUser() {
         if(thisUser == null) {
@@ -446,7 +483,7 @@ public class FudiApp {
         notifs.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if(!dataSnapshot.getKey().equals("test")){
+                if (!dataSnapshot.getKey().equals("test")) {
                     FudiNotification fn = FudiNotification.fromFirebaseToFudiNotification(
                             (HashMap<String, Object>) dataSnapshot.getValue());
                     if (fn != null) {
@@ -456,16 +493,20 @@ public class FudiApp {
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {}
+            public void onCancelled(FirebaseError firebaseError) {
+            }
         });
 
 
@@ -500,7 +541,7 @@ public class FudiApp {
         });
 
         SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(phoneNumber, null, "Fudi Registration Code: "+code, null, null);
+        smsManager.sendTextMessage(phoneNumber, null, "Fudi Registration Code: " + code, null, null);
 
         return code;
     }
