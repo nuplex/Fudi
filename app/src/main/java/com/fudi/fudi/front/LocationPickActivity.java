@@ -59,7 +59,6 @@ public class LocationPickActivity extends FragmentActivity implements OnMapReady
     private Circle mapCircle;
 
 
-
     public static int HERE_SELECTED = 200;
     public static int GLOBAL_SELECTED = 201;
     public static int CHOOSE_SELECTED = 202;
@@ -125,8 +124,8 @@ public class LocationPickActivity extends FragmentActivity implements OnMapReady
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        } else if (id == R.id.fudi_action_back){
-            if(clickedChoose){
+        } else if (id == R.id.fudi_action_back) {
+            if (clickedChoose) {
                 clickedChoose = false;
                 mapHolder.setVisibility(View.GONE);
                 buttonHolder.setVisibility(View.VISIBLE);
@@ -177,17 +176,12 @@ public class LocationPickActivity extends FragmentActivity implements OnMapReady
         });
         googleMap.getUiSettings().setAllGesturesEnabled(true);
 
+        FudiApp.getInstance().checkLocationPermission(LocationPickActivity.this);
 
         zoom = FudiApp.getInstance().FudiLocationManager(getApplicationContext()).
-                    getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
         myLocation = new LatLng(zoom.getLatitude(), zoom.getLongitude());
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission
-                (this, Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
 
         googleMap.setMyLocationEnabled(true);
 

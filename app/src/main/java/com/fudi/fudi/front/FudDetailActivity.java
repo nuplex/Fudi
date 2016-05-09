@@ -36,6 +36,7 @@ import com.fudi.fudi.back.GeneralComment;
 import com.fudi.fudi.back.ImageHandler;
 import com.fudi.fudi.back.ReviewComment;
 import com.fudi.fudi.back.Vote;
+import com.yelp.clientlib.entities.Business;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,6 +116,7 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
         //Set button actions
         ImageButton upvoteButton = (ImageButton) findViewById(R.id.fud_detail_upvote_button);
         ImageButton downvoteButton = (ImageButton) findViewById(R.id.fud_detail_downvote_button);
+        ImageButton yelpButton = (ImageButton) findViewById(R.id.fud_detail_yelp_button);
 
         upvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.UPFU, downvoteButton,
                 netVote, oneVotePressed, null, null, fudDetail,
@@ -122,6 +124,23 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
         downvoteButton.setOnClickListener(new VoteClickListener(vote, Vote.Type.DOWNFU,
                 upvoteButton, netVote, oneVotePressed, null, null,
                 fudDetail, fudDetail.getWhoPosted().getUserID()));
+        yelpButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Business yelpBis = fudDetail.getYelpBusiness();
+                if (yelpBis != null) {
+                    Uri yelpSite = Uri.parse(yelpBis.mobileUrl());
+                    if (yelpSite != null) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, yelpSite);
+                        Log.i("Yelp", "Trying to go to URL");
+                        startActivity(intent);
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Business Not found on Yelp Mobile",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
         //Load in the image
         ImageView image = (ImageView) findViewById(R.id.fud_detail_dish);

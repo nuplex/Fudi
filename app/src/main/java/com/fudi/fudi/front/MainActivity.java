@@ -81,13 +81,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
 
         //Starts getting location requests
+
+        FudiApp.getInstance().checkLocationPermission(MainActivity.this);
+
         locationManager = FudiApp.getInstance().FudiLocationManager(getApplicationContext());
 
         FudiApp.getInstance().setLocationRequested(true);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
+
+
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_UPDATE_TIME,
                 LOCATION_UPDATE_DISTANCE, FudiApp.getInstance().getLocationListener());
 

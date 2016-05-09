@@ -59,6 +59,7 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
      * The location where the post was made. Unsure if needed.
      */
     private Location locationPosted;
+    private Business yelpBusiness;
 
     /**
      * The location of the restaurant, this is used in filtering posts by area.
@@ -120,45 +121,63 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
      * If you need more info to do this, feel free to add necessary parameters.
      * @param restaurant name
      */
-    public void setLocationOfRestaurant(String restaurant) {
+    public void setLocationOfRestaurant(final String restaurant) {
         //TODO: If possible, access Yelp for this restaurant and get it's location (lat/long)
         //Should be done asynchronously
-        YelpAPIFactory apiFactory = new YelpAPIFactory(CONSUMER_KEY, CONSUMER_SECRET, TOKEN,
-                TOKEN_SECRET);
-        YelpAPI yelpAPI = apiFactory.createAPI();
+        if (getLocationPosted() != null) {
+            YelpAPIFactory apiFactory = new YelpAPIFactory(CONSUMER_KEY, CONSUMER_SECRET, TOKEN,
+                    TOKEN_SECRET);
+            YelpAPI yelpAPI = apiFactory.createAPI();
 
-        Map<String, String> resturantParams = new HashMap<>();
+            Map<String, String> resturantParams = new HashMap<>();
 
-        resturantParams.put("term", restaurant);
-        resturantParams.put("limit", "5");
+            resturantParams.put("term", restaurant);
+            resturantParams.put("limit", "5");
 
 
-        CoordinateOptions coordinate = CoordinateOptions.builder()
-                .latitude(getLocationPosted().getLatitude())
-                .longitude(getLocationPosted().getLongitude()).build();
-        Log.i("TAG", getLocationPosted().toString() + " " + getLocationPosted().toString());
-        Call<SearchResponse> call = yelpAPI.search(coordinate, resturantParams);
+            CoordinateOptions coordinate = CoordinateOptions.builder()
+                    .latitude(getLocationPosted().getLatitude())
+                    .longitude(getLocationPosted().getLongitude()).build();
 
-        Callback<SearchResponse> callback = new Callback<SearchResponse>() {
-            @Override
-            public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
-                ArrayList<Business> businesses = response.body().businesses();
+            Call<SearchResponse> call = yelpAPI.search(coordinate, resturantParams);
 
-                for(Business b: businesses) {
-                    /*
-                      TODO
-                     * Just have to determine how we want to
-                     */
+            Callback<SearchResponse> callback = new Callback<SearchResponse>() {
+                @Override
+                public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
+                    ArrayList<Business> businesses = response.body().businesses();
+                    Business bestBusiness = null;
+                    //Narrows down closest business to search location
+                    if (businesses.size() > 0) {
+                        double firstDistance = Double.MAX_VALUE;
+
+                        for (Business refinedB : businesses) {
+                            if (refinedB.name().contains(restaurant)) {
+                                try {
+                                    double dist = refinedB.distance();
+                                    if (dist <= firstDistance) {
+                                        Log.i("TAG", "BestBusiness changed");
+                                        firstDistance = dist;
+                                        bestBusiness = refinedB;
+                                    }
+                                } catch (NullPointerException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        yelpBusiness = bestBusiness;
+                    } else {
+                        Log.i("Error", "No business found");
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SearchResponse> call, Throwable t) {
+                @Override
+                public void onFailure(Call<SearchResponse> call, Throwable t) {
+                    Log.i("Error", "No business found");
+                }
+            };
 
-            }
-        };
-
-        call.enqueue(callback);
+            call.enqueue(callback);
+        }
     }
 
     /**
@@ -237,6 +256,8 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
     public Date getTimestamp() {
         return timestamp;
     }
+
+    public Business getYelpBusiness() { return yelpBusiness;}
 
     public TreeMap<String, Object> toFirebase(){
         TreeMap firebaseable = new TreeMap<String, Object>();

@@ -1,12 +1,16 @@
 package com.fudi.fudi.back;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
@@ -58,6 +62,9 @@ public class FudiApp {
     private static final int TIMEOUT = 10000;
 
     private static final int DEFAULT_FUD_PULL_NUM = 25;
+
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 26;
+
 
     private User thisUser;
     private String thisUsersID;
@@ -835,6 +842,17 @@ public class FudiApp {
         return locationListener;
     }
 
+    public void checkLocationPermission (Activity activity) {
+        if (ContextCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity,
+                    new String []{Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_LOCATION);
+        }
+    }
     /**
      * The LocationListener for the app. Runs whenever a location request is made.
      */

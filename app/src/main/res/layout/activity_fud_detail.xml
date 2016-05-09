@@ -100,6 +100,14 @@
                                     android:text="comment"
                                     android:textColor="@color/secondary_text_color"
                                     android:textSize="15sp" />
+                                <ImageButton
+                                    android:background="@drawable/yelp_logo_small"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:id="@+id/fud_detail_yelp_button"
+                                    android:layout_below="@+id/fud_detail_desc_text"
+                                    android:paddingTop="5dp"
+                                    />
 
                                 <LinearLayout
                                     android:id="@+id/fud_detail_username_time"

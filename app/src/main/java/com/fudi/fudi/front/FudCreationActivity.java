@@ -97,16 +97,10 @@ public class FudCreationActivity extends AppCompatActivity {
 
         locationManager = FudiApp.getInstance().FudiLocationManager(getApplicationContext());
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            /*TODO:
-                Implement permission request if Location permission is not accessible
-             */
-        }
+        FudiApp.getInstance().checkLocationPermission(FudCreationActivity.this);
 
-        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-        Toast.makeText(getApplicationContext(), Double.toString(location.getLatitude()) + " " +
-                Double.toString(location.getLongitude()), Toast.LENGTH_LONG).show();
 
         flexSpaceShrunkAndMainShown = false;
 
@@ -453,8 +447,10 @@ public class FudCreationActivity extends AppCompatActivity {
 
                        final FudDetail fudDetail = new FudDetail(imageURL, dishName, restName, costText,
                                 descText, FudiApp.getInstance().getThisUser(), "");
+
                         //Used for testing Yelp
                         fudDetail.setLocationPosted(location);
+                        fudDetail.setLocationOfRestaurant(fudDetail.getRestaurant());
 
                         //Upload the FudDetail to the database
                         /**
