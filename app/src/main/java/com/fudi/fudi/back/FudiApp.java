@@ -16,6 +16,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -62,20 +63,29 @@ public class FudiApp {
 
     private static final String SERVER_LOCATION = "https://fudiapp.firebaseio.com/";
     public static final String USERS = "users";
+    public static final String USERNAMES = "usernames";
+    public static final String PHONENUMBERS = "phoneNumbers";
     public static final String FUDDETAILS = "fudDetails";
     public static final String COMMENTS = "comments";
+    public static final String NOTIFICATIONS = "notifications";
     private static final int TIMEOUT = 10000;
 
     private static final int DEFAULT_FUD_PULL_NUM = 25;
 
     private User thisUser;
     private String thisUsersID;
+    private String currentVerifyCode;
 
     private FudDetail currentFudDetailToDisplay = null;
     private Fud currentOperatingFud = null;
     private FudDetail currentOperatingFudDetail = null;
     private CommentSection currentOperatingCommentSection = null;
     private TreeSet<FudDetail> currentlyDisplayedFudDetails = new TreeSet<FudDetail>();
+    private TreeSet<FudiNotification> currentOperatingNotifications = new TreeSet<FudiNotification>();
+    private boolean childEventActive = false;
+
+    private AtomicBoolean found = new AtomicBoolean(true);
+
 
     public boolean alreadyDidLogin = false;
 
@@ -84,6 +94,7 @@ public class FudiApp {
     private boolean locationRequested;
     private Firebase firebase;
     private LocationManager locationManager;
+    private GeoArea currentArea;
 
     /**
      * A Location set by the user in case all location requests fail.
@@ -97,7 +108,7 @@ public class FudiApp {
     public Location peekLocation;
     private FudiLocationListener locationListener;
 
-    private FudiApp() {
+    private FudiApp(){
         /*TODO: connect to database and get the user_id and phone number associated with this
         phones user and load in that user.
          */
@@ -108,7 +119,7 @@ public class FudiApp {
         fixedLocation = new Location(LocationManager.GPS_PROVIDER);
     }
 
-    public static FudiApp getInstance() {
+    public static FudiApp getInstance(){
         return app;
     }
 
@@ -119,7 +130,7 @@ public class FudiApp {
      * Checks whether or not the user has an internet connection; and that it can be connected to
      * @return true if can make a network connection, false otherwise
      */
-    public static boolean hasNetworkConnection() {
+    public static boolean hasNetworkConnection(){
 
         boolean has = false;
         try {
@@ -127,7 +138,7 @@ public class FudiApp {
             HttpURLConnection check = (HttpURLConnection) urlToCheck.openConnection();
             check.disconnect();
             has = true;
-        } catch (IOException e) {
+        } catch (IOException e){
             has = false;
         }
         return has;
@@ -138,31 +149,28 @@ public class FudiApp {
      * @param fudId
      * @return the FudDetail for the associated ID, or null if not found
      */
-    public FudDetail pullFudDetail(String fudId) {
+    public FudDetail pullFudDetail(String fudId){
         final Firebase fudDetailRef = firebase.child(FUDDETAILS).child(fudId);
         final AtomicBoolean done = new AtomicBoolean(false);
         fudDetailRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.getValue().equals("test")) {
+                if(!dataSnapshot.getValue().equals("test")) {
                     currentFudDetailToDisplay =
                             FudDetail.firebaseToFudDetail((HashMap<String, Object>) dataSnapshot.getValue());
-                    done.set(true);
                 }
             }
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
-                done.set(true);
+
             }
         });
-
-        busyWaitOrTimeout(done);
 
         return currentFudDetailToDisplay;
     }
 
-    public CommentSection pullCommentSectionForFudDetail(String fudId) {
+   /* public CommentSection pullCommentSectionForFudDetail(String fudId) {
         final Firebase fudDetailCommentsRef = firebase.child(FUDDETAILS).child(fudId).child(COMMENTS);
         final AtomicBoolean done = new AtomicBoolean(false);
         fudDetailCommentsRef.addValueEventListener(new ValueEventListener() {
@@ -173,18 +181,17 @@ public class FudiApp {
                                 (HashMap<String, Object>) dataSnapshot.getValue());
                 done.set(true);
             }
-
             @Override
             public void onCancelled(FirebaseError firebaseError) {
                 done.set(true);
             }
         });
-
         return currentOperatingCommentSection;
-    }
+    } */
 
 
-    public Fud pullFud(String fudId) {
+    @Deprecated
+    public Fud pullFud(String fudId){
         final Firebase fudDetailRef = firebase.child(FUDDETAILS).child(fudId);
         final AtomicBoolean done = new AtomicBoolean(false);
         fudDetailRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -203,15 +210,15 @@ public class FudiApp {
 
         busyWaitOrTimeout(done);
 
-        if (currentFudDetailToDisplay == null) {
+        if(currentFudDetailToDisplay == null){
             return null;
         } else {
             return currentOperatingFudDetail.simplify();
         }
     }
 
-    public TreeSet<FudDetail> pullFudsByTime() {
-        (new AsyncTask<Void, Void, Void>() {
+    public TreeSet<FudDetail> pullFudsByTime(){
+        (new AsyncTask<Void, Void,Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 final Firebase fudDetailsRef = firebase.child(FUDDETAILS);
@@ -220,37 +227,53 @@ public class FudiApp {
 
                 query.addChildEventListener(new
 
-                                                    ChildEventListener() {
+                                                    ChildEventListener(){
                                                         @Override
                                                         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                                                             if (dataSnapshot.exists()) {
-                                                                if (dataSnapshot.getKey().equals("test")) {
-                                                                    return;
-                                                                }
+                                                                if(dataSnapshot.getKey().equals("test")){return;}
                                                                 FudDetail fd = FudDetail.firebaseToFudDetail(
-                                                                        (HashMap<String, Object>) dataSnapshot.getValue());
-                                                                if (fd != null) {
-                                                                    currentlyDisplayedFudDetails.add(fd);
-                                                                }
+                                                                        (HashMap<String, Object>)dataSnapshot.getValue());
+                                                               if (fd != null) {
+                                                                   currentlyDisplayedFudDetails.add(fd);
+                                                               }
                                                             }
                                                         }
 
                                                         @Override
                                                         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                                                            if (dataSnapshot.getKey().equals("test")) {
-                                                                return;
-                                                            }
-                                                            for (FudDetail fd : currentlyDisplayedFudDetails) {
-                                                                if (fd.getFudID().equals(dataSnapshot.getKey())) {
-                                                                    fd = FudDetail.firebaseToFudDetail(
-                                                                            (HashMap<String, Object>) dataSnapshot.getValue());
+                                                            if(dataSnapshot.getKey().equals("test")){return;}
+                                                            FudDetail found = null;
+                                                            FudDetail toAdd = null;
+                                                            for(FudDetail fd : currentlyDisplayedFudDetails){
+                                                                if(fd.getFudID().equals(dataSnapshot.getKey())){
+                                                                    found = fd;
+                                                                    toAdd = FudDetail.firebaseToFudDetail(
+                                                                            (HashMap<String, Object>)dataSnapshot.getValue());
                                                                     break;
                                                                 }
+                                                            }
+                                                            if(toAdd != null){
+                                                                if(found != null){
+                                                                    currentlyDisplayedFudDetails.remove(found);
+                                                                }
+                                                                currentlyDisplayedFudDetails.add(toAdd);
                                                             }
                                                         }
 
                                                         @Override
                                                         public void onChildRemoved(DataSnapshot dataSnapshot) {
+                                                            if(dataSnapshot.getKey().equals("test")){return;}
+                                                            FudDetail found = null;
+                                                            for(FudDetail fd : currentlyDisplayedFudDetails){
+                                                                if(fd.getFudID().equals(dataSnapshot.getKey())){
+                                                                    found = fd;
+                                                                    break;
+                                                                }
+                                                            }
+                                                            if(found != null){
+                                                                currentlyDisplayedFudDetails.remove(found);
+                                                            }
 
                                                         }
 
@@ -265,21 +288,21 @@ public class FudiApp {
                                                     }
 
                 );
-                return null;
+                return  null;
             }
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         return currentlyDisplayedFudDetails;
     }
 
-    public void pushFudDetail(final FudDetail fudDetail) {
+    public void pushFudDetail(final FudDetail fudDetail){
         final String fudID = fudDetail.getFudID();
         final Firebase fudRef = firebase.child(FUDDETAILS);
         final AtomicBoolean done = new AtomicBoolean(false);
         fudRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.hasChild(fudID)) {
+                if(dataSnapshot.hasChild(fudID)){
                     //update
                     fudRef.child(fudID).setValue(fudDetail.toFirebase());
                 } else {
@@ -299,7 +322,7 @@ public class FudiApp {
         busyWaitOrTimeout(done);
     }
 
-    public void pushCommentForFudDetail(String fudID, final Comment comment) {
+    public void pushCommentForFudDetail(String fudID, final Comment comment){
         final Firebase fudDetailCommentsRef = firebase.child(FUDDETAILS).child(fudID).child(COMMENTS);
         final AtomicBoolean done = new AtomicBoolean(false);
         fudDetailCommentsRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -321,7 +344,7 @@ public class FudiApp {
     }
 
     public User getThisUser() {
-        if (thisUser == null) {
+        if(thisUser == null) {
             final String userId = thisUsersID;
             final Firebase userRef = firebase.child(USERS);
             final AtomicBoolean done = new AtomicBoolean(false);
@@ -349,7 +372,7 @@ public class FudiApp {
                 }
             });
 
-            busyWaitOrTimeout(done);
+            //busyWaitOrTimeout(done);
 
             if (thisUser == null) {
                 return TestDatabase.getInstance().getTestUser();
@@ -361,31 +384,208 @@ public class FudiApp {
         }
     }
 
-    public void loadInThisID(String userID) {
+    public void getUsersFuds(String userID){
+
+    }
+
+    public void getCommentedOnFudsForUser(String userID){
+
+    }
+
+    public TreeSet<FudiNotification> getNotifications(){
+        Firebase notifRef = firebase.child(USERS).child(NOTIFICATIONS);
+        Query notifs = notifRef.orderByKey();
+        notifs.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(!dataSnapshot.getKey().equals("test")){
+                    FudiNotification fn = FudiNotification.fromFirebaseToFudiNotification(
+                            (HashMap<String, Object>) dataSnapshot.getValue());
+                    if (fn != null) {
+                        currentOperatingNotifications.add(fn);
+                    }
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {}
+        });
+
+
+        return currentOperatingNotifications;
+    }
+
+    public void loadInThisID(String userID){
         thisUsersID = userID;
     }
 
-    public static String getTimeSincePostedString(Date time) {
+
+    public String generateAndSendCode(String phoneNumber){
+        final String code = generateCode();
+        final Firebase userRef = firebase.child(USERS).child(thisUser.getUserID());
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild("verifyCode")) {
+                    userRef.child("verifyCode").setValue(code);
+                    currentVerifyCode = code;
+                } else {
+                    userRef.child("verifyCode").push();
+                    userRef.child("verifyCode").setValue(code);
+                    currentVerifyCode = code;
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+        SmsManager smsManager = SmsManager.getDefault();
+        smsManager.sendTextMessage(phoneNumber, null, "Fudi Registration Code: "+code, null, null);
+
+        return code;
+    }
+
+    public boolean verifyCode(final String code){
+        Firebase userCode = firebase.child(USERS).child(thisUser.getUserID()).child("verifyCode");
+        final AtomicBoolean done = new AtomicBoolean(false);
+        userCode.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //if(dataSnapshot.getValue().equals(code)){
+                currentVerifyCode = (String) dataSnapshot.getValue();
+                //}
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
+        if(currentVerifyCode == null){
+            return false;
+        } else {
+            if(currentVerifyCode.equals(code)){
+                return true;
+            }
+            return  false;
+        }
+    }
+
+    /**
+     *
+     * @return True if username is available, false otherwise
+     */
+    public boolean checkUsernameAvailability(final String username){
+        Firebase usernameRef = firebase.child(USERNAMES);
+        usernameRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild(username)){
+                    found.set(true);
+                } else {
+                    found.set(false);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+        return !found.get();
+    }
+
+    public boolean checkPhoneNumberInUse(final String phoneNumber){
+        final Firebase phoneNumberRef = firebase.child(PHONENUMBERS);
+        final AtomicBoolean found = new AtomicBoolean(true);
+        phoneNumberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild(phoneNumber)) {
+                    found.set(true);
+                } else {
+                    found.set(false);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                found.set(false);
+            }
+        });
+
+        return !found.get();
+    }
+
+    public boolean registerThisUser(final String username, final String phoneNumber){
+        final Firebase usernameRef = firebase.child(USERNAMES);
+        final AtomicBoolean success = new AtomicBoolean(false);
+        usernameRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                thisUsersID = thisUser.getUserID();
+                usernameRef.child(username).push();
+                usernameRef.child(username).child("username").push();
+                usernameRef.child(username).child("username").setValue(username);
+                usernameRef.child(username).child("userID").push();
+                usernameRef.child(username).child("userID").setValue(thisUser.getUsername());
+                Firebase userRef = firebase.child(USERS).child(thisUsersID);
+                userRef.child("username").setValue(username);
+                userRef.child("registered").setValue(true);
+                userRef.child("verified").setValue(true);
+                userRef.child("phoneNumber").setValue(phoneNumber);
+                firebase.child(PHONENUMBERS).child(phoneNumber).child("userID").push();
+                firebase.child(PHONENUMBERS).child(phoneNumber).child("userID").setValue(thisUsersID);
+                userRef.child("firstTime").setValue(false);
+                success.set(true);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                success.set(false);
+
+            }
+        });
+        return success.get();
+    }
+
+    public static String getTimeSincePostedString(Date time){
         Date now = Calendar.getInstance().getTime();
         long diff = now.getTime() - time.getTime();
-        diff = Math.round(diff / 1000); //want in seconds
-        if (diff < 60) {
+        diff =  Math.round(diff/1000); //want in seconds
+        if(diff < 60){
             return diff + "s ago";
-        } else if (diff < 3600) {
-            diff = Math.round(diff / 60);
+        } else if (diff < 3600){
+            diff = Math.round(diff/60);
             return diff + " m ago";
-        } else if (diff < 86400) {
-            diff = Math.round(diff / 3600);
+        } else if (diff <  86400){
+            diff = Math.round(diff/3600);
             return diff + " hr ago";
-        } else if (diff < 604800) { //604800 is 7 days
-            diff = Math.round(diff / 86400);
-            return diff + " days ago";
+        } else if (diff < 604800){ //604800 is 7 days
+            diff = Math.round(diff/86400);
+            if(diff == 1) {
+                return diff + " day ago";
+            } else {
+                return diff + " days ago";
+            }
         } else {
             return getFormattedTime(time);
         }
     }
 
-    public static String getFormattedTime(Date time) {
+    public static String getFormattedTime(Date time){
         return (new SimpleDateFormat("MMM d, yyyy - h:mm a").format(time));
     }
 
@@ -402,18 +602,18 @@ public class FudiApp {
      * @param done
      * @return whether exited naturally (true) or timed out/an error occured (false)
      */
-    public boolean busyWaitOrTimeout(AtomicBoolean done) {
+    public boolean busyWaitOrTimeout(AtomicBoolean done, long ms){
         int waitTime = 100;
         int waited = 0;
-        while (!done.get()) {
-            if (waited >= TIMEOUT) {
+        while(!done.get()){
+            if(waited >= ms){
                 return false;
             }
 
             synchronized (this) {
                 try {
                     this.wait(waitTime);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException e){
                     return false;
                 }
             }
@@ -424,15 +624,37 @@ public class FudiApp {
         return true;
     }
 
-    public static String generateID(int length) {
-        char[] lower = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'
-                , 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-        char[] upper = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-                'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+    public boolean busyWaitOrTimeout(AtomicBoolean done){
+        int waitTime = 100;
+        int waited = 0;
+        while(!done.get()){
+            if(waited >= TIMEOUT){
+                return false;
+            }
+
+            synchronized (this) {
+                try {
+                    this.wait(waitTime);
+                } catch (InterruptedException e){
+                    return false;
+                }
+            }
+            waited += waitTime;
+
+        }
+        Log.d("WAITED", Integer.toString(waited));
+        return true;
+    }
+
+    public static String generateID(int length){
+        char[] lower = {'a','b','c','d','e','f','g','h','i','j'
+                ,'k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+        char[] upper =  {'A','B','C','D','E','F','G','H','I','J',
+                'K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
         int i = length;
         StringBuffer id = new StringBuffer("");
         SecureRandom r = new SecureRandom();
-        while (i > 0) {
+        while(i > 0) {
             int choice = r.nextInt(3);
             switch (choice) {
                 case 0:
@@ -452,6 +674,12 @@ public class FudiApp {
         return id.toString();
     }
 
+    private static String generateCode(){
+        SecureRandom r = new SecureRandom();
+        String code = Integer.toString(r.nextInt(900000) + 100000);
+        return code;
+    }
+
     public Fud getCurrentOperatingFud() {
         return currentOperatingFud;
     }
@@ -460,9 +688,17 @@ public class FudiApp {
         return currentOperatingFudDetail;
     }
 
+    public TreeSet<FudiNotification> getCurrentOperatingNotifications() {
+        return currentOperatingNotifications;
+    }
+
     public static void hideSoftKeyboard(Activity activity) {
-        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        try {
+            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        } catch (NullPointerException e){
+            e.printStackTrace();
+        }
     }
 
     public Firebase getFirebase() {
@@ -473,11 +709,30 @@ public class FudiApp {
      * Updates the user's location.
      */
     public void updateLocation() {
+        currentArea = new GeoArea("Current", locationListener.getLocation().getLatitude(),
+                locationListener.getLocation().getLongitude(),10000);
     }
 
     public LocationManager FudiLocationManager(Context context) {
          return locationManager = (LocationManager)
                  context.getSystemService(Context.LOCATION_SERVICE);
+    }
+
+    public void setLocationRequested(boolean requested) {
+        this.locationRequested = requested;
+    }
+
+    public Location getCurrentLocation() {
+        return locationListener.getLocation();
+    }
+
+    public GeoArea getCurrentArea() {
+        return currentArea;
+    }
+
+    public void setCurrentArea(GeoArea geoArea) {
+        currentArea = new GeoArea(geoArea.getName(), geoArea.getLatitude(), geoArea.getLongitude(),
+                geoArea.getRadius());
     }
 
     public FudiLocationListener getLocationListener() {
@@ -508,7 +763,7 @@ public class FudiApp {
          * @return the Location, or null if no location is available.
          */
         public Location getLocation(){
-            Log.i("LOCATION REQUESTED", "LOCATION REQUESTED");
+            //Log.i("LOCATION REQUESTED", "LOCATION REQUESTED");
             if(!GPSIsOut){
                 return currentGPSLocation;
             } else if (!PassiveIsOut){

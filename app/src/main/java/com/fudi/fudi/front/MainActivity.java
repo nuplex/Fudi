@@ -1,16 +1,22 @@
 package com.fudi.fudi.front;
 
 
+import android.Manifest;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -36,6 +42,7 @@ import com.fudi.fudi.R;
 import com.fudi.fudi.back.Fud;
 import com.fudi.fudi.back.FudDetail;
 import com.fudi.fudi.back.FudiApp;
+import com.fudi.fudi.back.GeoArea;
 import com.fudi.fudi.back.ImageHandler;
 import com.fudi.fudi.back.TestDatabase;
 import com.fudi.fudi.back.User;
@@ -56,10 +63,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private FrameLayout mainframe;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ImageManager imgManager;
+    private LocationManager locationManager;
 
-    protected static final int FUD_CREATION_SUCCESS =  1;
-    protected static final int FUD_CREATION_FAILURE =  2;
+
+    protected static final int FUD_CREATION_SUCCESS = 1;
+    protected static final int FUD_CREATION_FAILURE = 2;
     protected static final int LOGIN_SUCCESS = 3;
+    protected static final int LOCATION_REQUEST_CODE = 4;
+    protected static final int LOCATION_UPDATE_TIME = 60 * 1000 * 2;
+    protected static final int LOCATION_UPDATE_DISTANCE = 100;
 
     public MainActivity() {
 
@@ -77,6 +89,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mainframe = (FrameLayout) findViewById(R.id.main_frame_layout);
         imgManager = new ImageManager(getApplicationContext());
 
+
+        //Starts getting location requests
+        locationManager = FudiApp.getInstance().FudiLocationManager(getApplicationContext());
+
+        FudiApp.getInstance().setLocationRequested(true);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_UPDATE_TIME,
+                LOCATION_UPDATE_DISTANCE, FudiApp.getInstance().getLocationListener());
+
+
         //set button onClickListener
         ImageButton newFudButton = (ImageButton) findViewById(R.id.main_new_fud_button);
         newFudButton.setOnClickListener(new View.OnClickListener() {
@@ -91,22 +116,22 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
 
-        if(!networkCheck()){
+        if (!networkCheck()) {
             return;
         }
 
         SharedPreferences sharedPref = getSharedPreferences(
                 getString(R.string.preference_file_key), MODE_PRIVATE);
-        if(!sharedPref.contains("userID")){
+        if (!sharedPref.contains("userID")) {
             String userID = User.generateID();
             sharedPref.edit().putString("userID", userID).commit();
         }
 
-        if(!sharedPref.contains("firstTime")){
+        if (!sharedPref.contains("firstTime")) {
             sharedPref.edit().putString("firstTime", "true").commit();
         }
 
-        if(!sharedPref.contains("registered")){
+        if (!sharedPref.contains("registered")) {
             sharedPref.edit().putString("registered", "false").commit();
         }
 
@@ -114,11 +139,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         FudiApp.getInstance().loadInThisID(sharedPref.getString("userID", "notfound"));
 
         boolean gotUser = false;
-        if(firstTime.equals("true")){
-            if(!FudiApp.getInstance().alreadyDidLogin){
+        if (firstTime.equals("true")) {
+            if (!FudiApp.getInstance().alreadyDidLogin) {
                 FudiApp.getInstance().getThisUser();
                 gotUser = true;
-                if(!FudiApp.getInstance().getThisUser().isRegistered()) {
+                if (!FudiApp.getInstance().getThisUser().isRegistered()) {
                     FudiApp.getInstance().alreadyDidLogin = true;
                     Intent reg = new Intent(this, LoginActivity.class);
                     startActivity(reg);
@@ -127,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
 
 
-        if(!gotUser) {
+        if (!gotUser) {
             (new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
@@ -140,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         //liivt = new LoadImageInViewTask(fudViews, scroll);
 
         //liivt.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        (new AsyncTask<Void, Void, Void>(){
+        (new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... params) {
@@ -158,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     protected void onResume() {
         super.onResume();
         pull();
-       // refresh();
+        // refresh();
         //liivt = new LoadImageInViewTask(fudViews, scroll);
         //liivt.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).execute();
         //System.gc();
@@ -168,6 +193,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     protected void onPause() {
         //pull();
         super.onPause();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        locationManager.removeUpdates(FudiApp.getInstance().getLocationListener());
         //liivt.cancel(true);
         //liivt = null;
         //removeAll();
@@ -175,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
         //liivt.cancel(true);
     }
@@ -187,16 +216,38 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         * the database is up and working.
         */
         pull();
-        if(requestCode == FUD_CREATION_SUCCESS  && resultCode == RESULT_OK){
+        if (requestCode == FUD_CREATION_SUCCESS && resultCode == RESULT_OK) {
 
-           // refresh();
+            // refresh();
             /**
              * TODO: Uncomment when database works and remove above line
-            fudList.add(FudiApp.getInstance().pullFudDetail(data.getStringExtra(Fud.EXTRA_TAG_ID)).simplify());
+             fudList.add(FudiApp.getInstance().pullFudDetail(data.getStringExtra(Fud.EXTRA_TAG_ID)).simplify());
              */
-        } else if (resultCode == FUD_CREATION_FAILURE && requestCode == FUD_CREATION_SUCCESS){
-            Toast.makeText(this,R.string.fud_creation_error,Toast.LENGTH_LONG).show();
-        } else if (resultCode == RESULT_CANCELED){}
+        } else if (resultCode == FUD_CREATION_FAILURE && requestCode == FUD_CREATION_SUCCESS) {
+            Toast.makeText(this, R.string.fud_creation_error, Toast.LENGTH_LONG).show();
+        } else if (resultCode == RESULT_CANCELED) {
+
+            //Results from the location screen
+        } else if (requestCode == LOCATION_REQUEST_CODE && resultCode ==
+                LocationPickActivity.HERE_SELECTED) {
+            FudiApp.getInstance().setLocationRequested(true);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            Location current = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            //Toast.makeText(getApplicationContext(), current.getLatitude() + " " + current.getLongitude(),
+                    //Toast.LENGTH_LONG).show();
+            FudiApp.getInstance().updateLocation();
+        } else if (requestCode == LOCATION_REQUEST_CODE && resultCode ==
+                LocationPickActivity.CHOOSE_SELECTED) {
+            GeoArea changed = data.getParcelableExtra(LocationPickActivity.SELECTED_GEO_AREA);
+            FudiApp.getInstance().setCurrentArea(changed);
+            //Toast.makeText(getApplicationContext(), changed.toString(), Toast.LENGTH_LONG).show();
+        } else if (requestCode == LOCATION_REQUEST_CODE && resultCode ==
+                LocationPickActivity.GLOBAL_SELECTED) {
+            FudiApp.getInstance().setCurrentArea(GeoArea.GLOBAL);
+           // Toast.makeText(getApplicationContext(), GeoArea.GLOBAL.toString(), Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -217,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         switch(id) {
             case R.id.action_location_here:
                 Intent h = new Intent(MainActivity.this, LocationPickActivity.class);
-                startActivity(h);
+                startActivityForResult(h, LOCATION_REQUEST_CODE);
                 return true;
             case R.id.fudi_action_user_account:
                 Intent i = new Intent(MainActivity.this, MeActivity.class);

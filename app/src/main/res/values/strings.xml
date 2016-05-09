@@ -47,5 +47,14 @@
     <!-- Popup -->
     <string name="processing_popup">Working...</string>
 
+    <!-- Map -->
+    <string name="remove_circle_yes">Yes</string>
+    <string name="remove_circle_no">No</string>
+    <string name="remove_circle_warning">Do you want to set your location here?</string>
+    <string name="remove_circle_title">Change Area?</string>
+    <string name="change_radius">Change Circle radius?</string>
+    <string name="confirm_change_title">Confirm area</string>
+    <string name="confirm_change_message">Satisfied with your choice?</string>
+
 
 </resources>
