@@ -87,6 +87,10 @@ public class NotificationService extends Service {
                 @Override
                 public void onChildAdded(DataSnapshot snapshot, String previousChildKey) {
 
+                    if(!(snapshot.getValue() instanceof  HashMap)){
+                        return;
+                    }
+
                     values = (HashMap<String, Object>) snapshot.getValue();
                     Log.i("NotificationService:", values.toString());
                     //FudiNotification fn = FudiNotification.fromFirebaseToFudiNotification(values);
