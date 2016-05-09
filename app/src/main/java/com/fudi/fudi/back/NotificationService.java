@@ -16,6 +16,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.fudi.fudi.R;
 import com.fudi.fudi.front.FudDetailActivity;
+import com.fudi.fudi.front.MainActivity;
 import com.fudi.fudi.front.NotificationView;
 
 import java.util.HashMap;
@@ -58,7 +59,6 @@ public class NotificationService extends Service {
         return START_NOT_STICKY;
     }
 
-
     @Override
     public IBinder onBind(Intent intent){
         return null;
@@ -80,7 +80,7 @@ public class NotificationService extends Service {
             firebase = new Firebase(SERVER_LOCATION);
             values = new HashMap<String, Object>();
 
-            Firebase userNotifyRef = firebase.child(FudiApp.USERS).child("U33s0N67eXR49e2o").child(FudiApp.NOTIFICATIONS);
+            Firebase userNotifyRef = firebase.child(FudiApp.USERS).child(userID).child(FudiApp.NOTIFICATIONS);
 
             userNotifyRef.addChildEventListener(new ChildEventListener() {
                 // Retrieve new posts as they are added to the database
@@ -110,6 +110,7 @@ public class NotificationService extends Service {
                             resultIntent.putExtra(Fud.EXTRA_TAG_ID,(String)values.get("fudID"));
                             resultIntent.putExtra(NotificationView.FROM_NOTIFICATION,true);
                             TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+                            stackBuilder.addParentStack(MainActivity.class);
                             stackBuilder.addParentStack(FudDetailActivity.class);
                             stackBuilder.addNextIntent(resultIntent);
                             PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
