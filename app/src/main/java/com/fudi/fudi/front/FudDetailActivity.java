@@ -34,6 +34,7 @@ import com.fudi.fudi.back.FudDetail;
 import com.fudi.fudi.back.FudiApp;
 import com.fudi.fudi.back.GeneralComment;
 import com.fudi.fudi.back.ImageHandler;
+import com.fudi.fudi.back.NotificationService;
 import com.fudi.fudi.back.ReviewComment;
 import com.fudi.fudi.back.Vote;
 import com.yelp.clientlib.entities.Business;
@@ -43,6 +44,8 @@ import java.io.IOException;
 import java.util.TreeSet;
 
 public class FudDetailActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+
+    private static final String SERVER_LOCATION = "https://fudiapp.firebaseio.com/";
 
     private TreeSet<CommentView> comments;
     private LinearLayout commentList;
@@ -69,11 +72,14 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
         Firebase.setAndroidContext(getApplicationContext());
 
         String fudID = getIntent().getStringExtra(Fud.EXTRA_TAG_ID);
+        Log.i("FudDetailActivity", fudID);
 
         comments = new TreeSet<CommentView>();
         if(getIntent().hasExtra(NotificationView.FROM_NOTIFICATION)){
-            FudDetail fd = FudiApp.getInstance().pullFudDetail(fudID);
-            if(fd == null){
+            Log.i("FudDetailActivity", "Calling pullFudDetail");
+            //FudDetail fd = FudiApp.getInstance().pullFudDetail(fudID);
+            fudDetail = NotificationService.notifyFud;
+            if(fudDetail == null){
                 Toast.makeText(this, "There was an error getting the fud :(", Toast.LENGTH_LONG).show();
                 finish();
                 return;
@@ -168,7 +174,6 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
     }
-
 
 
     @Override

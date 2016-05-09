@@ -55,13 +55,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private ImageManager imgManager;
     private LocationManager locationManager;
 
-
     protected static final int FUD_CREATION_SUCCESS = 1;
     protected static final int FUD_CREATION_FAILURE = 2;
     protected static final int LOGIN_SUCCESS = 3;
     protected static final int LOCATION_REQUEST_CODE = 4;
     protected static final int LOCATION_UPDATE_TIME = 60 * 1000 * 2;
     protected static final int LOCATION_UPDATE_DISTANCE = 100;
+
+    private boolean firstTimeStopped;
+    BroadcastReceiver rec;
 
     public MainActivity() {
 
@@ -159,18 +161,18 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         //liivt.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 
+        firstTimeStopped = true;
         IntentFilter intentFilter = new IntentFilter("com.fudi.fudi.LISTUPDATED");
-        BroadcastReceiver rec = new BroadcastReceiver() {
+        rec = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-
+                unregisterReceiver(rec);
                 Log.i("Broadcast", "Received Broadcast");
                 pull();
             }
         };
 
         registerReceiver(rec, intentFilter);
-
 
                 (new AsyncTask<Void, Void, Void>() {
 
@@ -189,13 +191,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     }
                 }).execute();
 
-
-        //Start the Notification Service.
-        Intent intent = new Intent(this, NotificationService.class);
-        intent.putExtra("userID", FudiApp.getInstance().getThisUser().getUserID());
-        startService(intent);
-
     }
+    @Override
+    public void onStop(){
+        super.onStop();
+
+        if(firstTimeStopped == true) {
+            //Start the Notification Service.
+            firstTimeStopped = false;
+            Intent intent = new Intent(this, NotificationService.class);
+            intent.putExtra("userID", FudiApp.getInstance().getThisUser().getUserID());
+            startService(intent);
+        }
+    }
+
 
     @Override
     protected void onResume() {
@@ -215,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             return;
         }
         locationManager.removeUpdates(FudiApp.getInstance().getLocationListener());
+
         //liivt.cancel(true);
         //liivt = null;
         //removeAll();

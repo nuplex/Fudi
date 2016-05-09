@@ -41,14 +41,19 @@
             android:theme="@style/AppTheme.Login" />
         <activity
             android:name=".front.MeActivity"
-            android:label="@string/title_activity_me" />
+            android:label="@string/title_activity_me"/>
         <activity
             android:name=".front.SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity
             android:name=".front.FudDetailActivity"
             android:label="@string/title_activity_fud_detail"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:parentActivityName=".front.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".front.MainActivity" />
+        </activity>
         <activity
             android:name=".front.FudCreationActivity"
             android:label="@string/title_activity_fud_creation"
