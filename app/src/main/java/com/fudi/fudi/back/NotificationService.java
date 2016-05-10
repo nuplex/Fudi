@@ -121,7 +121,7 @@ public class NotificationService extends Service {
                                             .setContentTitle("Fudi")
                                             .setAutoCancel(true)
                                             .setContentText("Someone commented on your post!")
-                                            .setLights(Color.parseColor("#FF8000"), 250, 100);
+                                            .setLights(Color.parseColor("#FF8000"), 400, 250);
 
                             Intent resultIntent = new Intent(getApplicationContext(), FudDetailActivity.class);
                             resultIntent.putExtra(Fud.EXTRA_TAG_ID,(String)values.get("fudID"));
