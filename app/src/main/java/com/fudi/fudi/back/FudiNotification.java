@@ -1,7 +1,5 @@
 package com.fudi.fudi.back;
 
-import android.content.Context;
-
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,16 +10,18 @@ import java.util.HashMap;
  */
 public class FudiNotification implements Comparable<FudiNotification> {
 
+    private static final String PREFIX = "NT";
+
     public enum NotificationType {FUD_POST, COMMENTED_ON}
 
     private String dishName;
     private String fudID;
+    private String notificationID;
     private Date time;
     private NotificationType nt;
     private boolean seen;
 
     private FudiNotification(){}
-
 
     public FudiNotification(String dishName, final String fudID, final Date time, boolean seen,
                             NotificationType nt){
@@ -30,8 +30,14 @@ public class FudiNotification implements Comparable<FudiNotification> {
         this.time = time;
         this.nt = nt;
         this.seen = seen;
+        this.notificationID = genarateID();
 
     }
+
+    public String getNotificationID(){
+        return notificationID;
+    }
+
 
     public NotificationType getNotificationType() {
         return nt;
@@ -76,8 +82,13 @@ public class FudiNotification implements Comparable<FudiNotification> {
         hm.put("timestamp", time);
         hm.put("userID", FudiApp.getInstance().getThisUser().getUserID());
         hm.put("seen", seen);
+        hm.put("notificationID", notificationID);
 
         return hm;
+    }
+
+    public String genarateID(){
+        return PREFIX + FudiApp.generateID(25);
     }
 
     public static FudiNotification fromFirebaseToFudiNotification(HashMap<String, Object> hm){
@@ -86,6 +97,7 @@ public class FudiNotification implements Comparable<FudiNotification> {
         fn.dishName = (String) hm.get("dishName");
         fn.time = new Date((Long) hm.get("timestamp"));
         fn.seen = (boolean) hm.get("seen");
+        fn.notificationID = (String) hm.get("notificationID");
 
         return fn;
     }

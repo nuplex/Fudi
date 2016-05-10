@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         Firebase.setAndroidContext(getApplicationContext());
 

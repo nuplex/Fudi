@@ -149,7 +149,7 @@ public class FudiApp {
         fudDetailRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.getValue().equals("test")) {
+                if (!dataSnapshot.getValue().equals("test")) {
                     currentFudDetailToDisplay =
                             FudDetail.firebaseToFudDetail((HashMap<String, Object>) dataSnapshot.getValue());
                 }
@@ -172,6 +172,7 @@ public class FudiApp {
             Fud f = (Fud) v;
             final Firebase fudDetailRef = firebase.child(FUDDETAILS).child(f.getFudID());
 
+            votes.put("netvotes", f.getVote().getNet());
             votes.put("upvotes", f.getVote().getUpvotes());
             votes.put("downvotes", f.getVote().getDownvotes());
 
@@ -182,6 +183,7 @@ public class FudiApp {
             FudDetail fd = (FudDetail) v;
             final Firebase fudDetailRef = firebase.child(FUDDETAILS).child(fd.getFudID());
 
+            votes.put("netvotes", fd.getVote().getNet());
             votes.put("upvotes", fd.getVote().getUpvotes());
             votes.put("downvotes", fd.getVote().getDownvotes());
 
@@ -194,6 +196,7 @@ public class FudiApp {
             final Firebase fudDetailRef = firebase.child(FUDDETAILS).child(
                     c.getParent().getParentFud().getFudID()).child("comments").child(String.valueOf(c.getCommentNumber()));
 
+            votes.put("netvotes", c.getVote().getNet());
             votes.put("upvotes", c.getVote().getUpvotes());
             votes.put("downvotes", c.getVote().getDownvotes());
 
@@ -419,7 +422,9 @@ public class FudiApp {
 
         if(alreadyNotified.get(fd.getWhoPosted().getUsername()) == null) {
             Firebase thisNotifyRef = notificationRef.child(fd.getWhoPosted().getUserID()).child(NOTIFICATIONS);
-            thisNotifyRef.push().setValue(notification);
+            thisNotifyRef.child(fudNotify.getNotificationID()).push();
+            thisNotifyRef.child(fudNotify.getNotificationID()).setValue(notification);
+            Log.i("Pushing a Notification:", thisNotifyRef.toString());
             alreadyNotified.put(fd.getWhoPosted().getUsername(), true);
         }
 
@@ -432,7 +437,9 @@ public class FudiApp {
             if (alreadyNotified.get(username) == null) {
                 alreadyNotified.put(username, true);
                 Firebase thisNotifyRef = notificationRef.child(c.getWhoPosted().getUserID()).child(NOTIFICATIONS);
-                thisNotifyRef.push().setValue(notification);
+                thisNotifyRef.child(commentNotify.getNotificationID()).push();
+                thisNotifyRef.child(commentNotify.getNotificationID()).setValue(notification);
+                Log.i("Pushing a Notification:", thisNotifyRef.toString());
             }
         }
 
