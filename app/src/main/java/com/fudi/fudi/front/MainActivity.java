@@ -21,7 +21,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -107,6 +109,33 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         });
 
         scroll = (ScrollView) findViewById(R.id.main_scrollview);
+        scroll.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+                    for (FudView fv : fudViews) {
+                        Rect viewR = new Rect();
+                        fv.getDrawingRect(viewR);
+                        scroll.getDrawingRect(viewR);
+                        int functionalTop = viewR.top - ImageHandler.pfdp(232 + 20, MainActivity.this);
+                        int functionalBottom = viewR.bottom;
+                        int thisTop = fv.getTopInScroll();
+                        if(thisTop < functionalBottom && thisTop > functionalTop){
+                            if(!fv.imageIsLoaded()){
+                                fv.loadImage();
+                            }
+                        } else {
+                            if(fv.imageIsLoaded()){
+                                fv.unloadImage();
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+
+
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
 
@@ -344,16 +373,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     public void display(){
-        int toDisplay = 4;
+        int toDisplay = 3;
+        int pos = 0;
         for(FudView fv : fudViews){
             fudList.addView(fv.getView());
             Space between = new Space(MainActivity.this);
             fudList.addView(between);
             between.getLayoutParams().height = ImageHandler.pfdp(20,MainActivity.this);
+            fv.setTopInScroll(pos);
             if(toDisplay >= 0){
                 fv.loadImage();
                 toDisplay--;
             }
+            pos = pos + ImageHandler.pfdp(232 + 20, this);
         }
     }
 
@@ -364,29 +396,34 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         Space between1 = new Space(MainActivity.this);
         between1.getLayoutParams().height = ImageHandler.pfdp(20,MainActivity.this);
 
-
+        int pos = 0;
         int toDisplay = 3;
         for(FudView fv : fudViews){
             fudList.addView(fv.getView());
             Space between = new Space(MainActivity.this);
             between.getLayoutParams().height = ImageHandler.pfdp(20,MainActivity.this);
 
+            fv.setTopInScroll(pos);
             if(toDisplay > 0){
                 fv.loadImage();
                 toDisplay--;
             }
+            pos = pos + ImageHandler.pfdp(232 + 20, this);
         }
+
     }
 
     private void addFudsToList(TreeSet<Fud> fuds){
         for(Fud f : fuds){
-            addFudView(new FudView(MainActivity.this, f));
+            FudView fv = new FudView(MainActivity.this, f);
+            addFudView(fv);
         }
     }
 
     private void addFudDetailsToList(TreeSet<FudDetail> fuds){
         for(FudDetail fd : fuds){
-            addFudView(new FudView(MainActivity.this, fd.simplify()));
+            FudView fv = new FudView(MainActivity.this, fd.simplify());
+            addFudView(fv);
         }
     }
     /**

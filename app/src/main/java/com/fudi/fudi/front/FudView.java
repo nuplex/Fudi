@@ -3,13 +3,16 @@ package com.fudi.fudi.front;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.fudi.fudi.R;
@@ -28,10 +31,13 @@ public class FudView extends View implements Comparable<FudView> {
     private LinearLayout fudView;
     private Fud fud;
     private Vote vote;
+    private ScrollView scroll;
     private boolean oneVotePressed;
     private Context context;
     private ImageView image;
     private boolean imageLoaded;
+
+    private int topInScroll;
 
     public FudView(Context context, Fud fud) {
         super(context);
@@ -131,7 +137,13 @@ public class FudView extends View implements Comparable<FudView> {
         return imageLoaded;
     }
 
+    public int getTopInScroll() {
+        return topInScroll;
+    }
 
+    public void setTopInScroll(int top) {
+        this.topInScroll = top;
+    }
 
     @Override
     public boolean equals(Object o) {
