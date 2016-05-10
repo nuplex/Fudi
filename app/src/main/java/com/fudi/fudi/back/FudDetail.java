@@ -133,11 +133,12 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
 
             resturantParams.put("term", restaurant);
             resturantParams.put("limit", "5");
-
-
+            resturantParams.put("radius_filter", "20000");
+            
             CoordinateOptions coordinate = CoordinateOptions.builder()
                     .latitude(getLocationPosted().getLatitude())
                     .longitude(getLocationPosted().getLongitude()).build();
+
 
             Call<SearchResponse> call = yelpAPI.search(coordinate, resturantParams);
 
@@ -149,13 +150,15 @@ public class FudDetail implements Comparable<FudDetail>, Voteable{
                     //Narrows down closest business to search location
                     if (businesses.size() > 0) {
                         double firstDistance = Double.MAX_VALUE;
-
                         for (Business refinedB : businesses) {
-                            if (refinedB.name().contains(restaurant)) {
+                            String [] split = restaurant.split("\\s+");
+                            //Log.i("Bagel", split.toString());
+                            if (refinedB.name().toLowerCase().contains
+                                    (split[0].toLowerCase())) {
                                 try {
                                     double dist = refinedB.distance();
                                     if (dist <= firstDistance) {
-                                        Log.i("TAG", "BestBusiness changed");
+                                        //Log.i("TAG", "BestBusiness changed");
                                         firstDistance = dist;
                                         bestBusiness = refinedB;
                                     }
