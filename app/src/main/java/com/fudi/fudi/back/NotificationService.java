@@ -80,7 +80,7 @@ public class NotificationService extends Service {
             firebase = new Firebase(SERVER_LOCATION);
             values = new HashMap<String, Object>();
 
-            Firebase userNotifyRef = firebase.child(FudiApp.USERS).child(userID).child(FudiApp.NOTIFICATIONS);
+            final Firebase userNotifyRef = firebase.child(FudiApp.USERS).child("U33s0N67eXR49e2o").child(FudiApp.NOTIFICATIONS);
 
             userNotifyRef.addChildEventListener(new ChildEventListener() {
                 // Retrieve new posts as they are added to the database
@@ -93,6 +93,16 @@ public class NotificationService extends Service {
 
                     values = (HashMap<String, Object>) snapshot.getValue();
                     Log.i("NotificationService:", values.toString());
+
+                    if((boolean) values.get("seen") == true){
+                        return;
+                    }
+
+                    values.put("seen", true);
+
+                    Firebase updateRef = userNotifyRef.child((String) values.get("notificationID"));
+                    updateRef.setValue(values);
+
                     //FudiNotification fn = FudiNotification.fromFirebaseToFudiNotification(values);
 
                     // Grab the FudDetail from online.

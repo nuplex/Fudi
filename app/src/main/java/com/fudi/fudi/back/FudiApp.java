@@ -422,7 +422,9 @@ public class FudiApp {
 
         if(alreadyNotified.get(fd.getWhoPosted().getUsername()) == null) {
             Firebase thisNotifyRef = notificationRef.child(fd.getWhoPosted().getUserID()).child(NOTIFICATIONS);
-            thisNotifyRef.push().setValue(notification);
+            thisNotifyRef.child(fudNotify.getNotificationID()).push();
+            thisNotifyRef.child(fudNotify.getNotificationID()).setValue(notification);
+            Log.i("Pushing a Notification:", thisNotifyRef.toString());
             alreadyNotified.put(fd.getWhoPosted().getUsername(), true);
         }
 
@@ -435,7 +437,9 @@ public class FudiApp {
             if (alreadyNotified.get(username) == null) {
                 alreadyNotified.put(username, true);
                 Firebase thisNotifyRef = notificationRef.child(c.getWhoPosted().getUserID()).child(NOTIFICATIONS);
-                thisNotifyRef.push().setValue(notification);
+                thisNotifyRef.child(commentNotify.getNotificationID()).push();
+                thisNotifyRef.child(commentNotify.getNotificationID()).setValue(notification);
+                Log.i("Pushing a Notification:", thisNotifyRef.toString());
             }
         }
 
