@@ -71,6 +71,9 @@ public class CommentSection {
                 continue;
             }
             HashMap<String, Object> commentMap = (HashMap<String, Object>) commentObject;
+            if(commentMap.get("type") == null){
+                continue;
+            }
             if(((String) commentMap.get("type")).equals("review")){
                 comms.add(ReviewComment.firebaseToReviewComment(commentMap, cs));
             } else {
