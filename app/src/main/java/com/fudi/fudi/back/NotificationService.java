@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -116,10 +117,11 @@ public class NotificationService extends Service {
                             //Build the notification.
                             NotificationCompat.Builder mBuilder =
                                     new NotificationCompat.Builder(getApplicationContext())
-                                            .setSmallIcon(R.drawable.fudi_icon)
+                                            .setSmallIcon(R.drawable.ic_stat_name)
                                             .setContentTitle("Fudi")
                                             .setAutoCancel(true)
-                                            .setContentText("Someone commented on your post!");
+                                            .setContentText("Someone commented on your post!")
+                                            .setLights(Color.parseColor("#FF8000"), 250, 100);
 
                             Intent resultIntent = new Intent(getApplicationContext(), FudDetailActivity.class);
                             resultIntent.putExtra(Fud.EXTRA_TAG_ID,(String)values.get("fudID"));

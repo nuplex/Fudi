@@ -33,7 +33,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="210dp"
                         android:layout_gravity="center_horizontal"
-                        android:background="#000000" />
+                        android:background="#000000"
+                        android:scaleType="centerCrop" />
 
                     <LinearLayout
                         android:id="@+id/fud_detail_main_area"
@@ -76,6 +77,15 @@
                                     android:textColor="@color/fud_post_restaurant"
                                     android:textSize="19sp" />
 
+                                <ImageButton
+                                    android:background="@drawable/yelp_logo_small"
+                                    android:layout_width="45dp"
+                                    android:layout_height="20dp"
+                                    android:id="@+id/fud_detail_yelp_button"
+                                    android:layout_below="@+id/fud_detail_desc_text"
+                                    android:paddingTop="5dp"
+                                    android:layout_marginBottom="2dp" />
+
                                 <TextView
                                     android:id="@+id/fud_detail_cost"
                                     android:layout_width="wrap_content"
@@ -100,14 +110,6 @@
                                     android:text="comment"
                                     android:textColor="@color/secondary_text_color"
                                     android:textSize="15sp" />
-                                <ImageButton
-                                    android:background="@drawable/yelp_logo_small"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:id="@+id/fud_detail_yelp_button"
-                                    android:layout_below="@+id/fud_detail_desc_text"
-                                    android:paddingTop="5dp"
-                                    />
 
                                 <LinearLayout
                                     android:id="@+id/fud_detail_username_time"

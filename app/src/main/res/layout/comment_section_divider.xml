@@ -2,7 +2,7 @@
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:orientation="vertical"
-    android:layout_height="5dp"
+    android:layout_height="2dp"
     android:background="@color/comment_separator_color"
     android:id="@+id/horizontal_divider" />
 

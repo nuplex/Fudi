@@ -71,6 +71,7 @@ public class FudiApp {
     private String currentVerifyCode;
 
     private FudDetail currentFudDetailToDisplay = null;
+    private TreeSet<FudDetail> currentlyDisplayedGeoAreaDisplay;
     private Fud currentOperatingFud = null;
     private FudDetail currentOperatingFudDetail = null;
     private CommentSection currentOperatingCommentSection = null;
@@ -80,6 +81,8 @@ public class FudiApp {
 
     private AtomicBoolean found = new AtomicBoolean(true);
 
+    private TreeSet<FudDetail> currentUsersFudDetails = new TreeSet<>();
+    private TreeSet<FudDetail> currentUsersCommentedOnFudDetails = new TreeSet<>();
 
     public boolean alreadyDidLogin = false;
 
@@ -345,6 +348,10 @@ public class FudiApp {
         return currentlyDisplayedFudDetails;
     }
 
+    public void pullFudsByArea(GeoArea ga){
+
+    }
+
     public void pushFudDetail(final FudDetail fudDetail){
         final String fudID = fudDetail.getFudID();
         final Firebase fudRef = firebase.child(FUDDETAILS);
@@ -491,11 +498,73 @@ public class FudiApp {
     }
 
     public void getUsersFuds(String userID){
+        Query fudRef = firebase.child(FUDDETAILS).orderByChild("whoPostedID").equalTo(userID);
+        fudRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                currentUsersFudDetails.add(FudDetail.firebaseToFudDetail((HashMap<String, Object>) dataSnapshot.getValue()));
+            }
 
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
     }
 
-    public void getCommentedOnFudsForUser(String userID){
+    public void getCommentedOnFudsForUser(final String userID){
+        Query fudRef = firebase.child(FUDDETAILS).orderByKey();
+        fudRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(dataSnapshot.hasChild(COMMENTS)) {
+                    for(DataSnapshot ds : dataSnapshot.child(COMMENTS).getChildren()){
+                        if(ds.getValue() instanceof HashMap){
+                                if(ds.child("userID").getValue().equals(userID)){
+                                    currentUsersCommentedOnFudDetails.add(FudDetail.firebaseToFudDetail(
+                                            (HashMap<String, Object>) dataSnapshot.getValue()));
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
 
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
     }
 
     public TreeSet<FudiNotification> getNotifications(){
@@ -650,7 +719,7 @@ public class FudiApp {
                     usernameRef.child(username).child("username").push();
                     usernameRef.child(username).child("username").setValue(username);
                     usernameRef.child(username).child("userID").push();
-                    usernameRef.child(username).child("userID").setValue(thisUser.getUsername());
+                    usernameRef.child(username).child("userID").setValue(thisUser.getUserID());
                     Firebase userRef = firebase.child(USERS).child(thisUsersID);
                     userRef.child("username").setValue(username);
                     userRef.child("registered").setValue(true);
@@ -802,6 +871,14 @@ public class FudiApp {
         return currentOperatingNotifications;
     }
 
+    public TreeSet<FudDetail> getCurrentUsersFudDetails() {
+        return currentUsersFudDetails;
+    }
+
+    public TreeSet<FudDetail> getCurrentUsersCommentedOnFudDetails() {
+        return currentUsersCommentedOnFudDetails;
+    }
+
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         try {
@@ -814,6 +891,7 @@ public class FudiApp {
     public Firebase getFirebase() {
         return firebase;
     }
+
 
     /**
      * Updates the user's location.

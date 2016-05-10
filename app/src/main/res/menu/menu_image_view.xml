@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.fudi.fudi.front.FudListActivity">
+    tools:context="com.fudi.fudi.front.ImageViewActivity">
     <item android:id="@+id/fudi_action_back"
         android:title="@string/action_back"
         app:showAsAction="always"

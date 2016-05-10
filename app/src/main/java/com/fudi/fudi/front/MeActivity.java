@@ -11,10 +11,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 import com.firebase.client.core.utilities.Tree;
 import com.fudi.fudi.R;
+import com.fudi.fudi.back.FudDetail;
 import com.fudi.fudi.back.FudiApp;
 import com.fudi.fudi.back.FudiNotification;
 import com.fudi.fudi.back.User;
@@ -23,14 +25,18 @@ import java.util.TreeSet;
 
 public class MeActivity extends AppCompatActivity{
 
-    LinearLayout infoholder;
-    LinearLayout notificationList;
-    TreeSet<NotificationView> notificationViews;
+    private LinearLayout infoholder;
+    private LinearLayout notificationList;
+    private TreeSet<NotificationView> notificationViews;
 
-    Button register;
+    private Button register;
+
+    public static String COMMENT_PRESSED = "comment";
+    public static String OWN_PRESSED = "own";
 
 
     @Override
+    @SuppressWarnings("ConstantConditions")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_me);
@@ -39,6 +45,13 @@ public class MeActivity extends AppCompatActivity{
         infoholder = (LinearLayout) findViewById(R.id.me_info_holder);
         notificationList = (LinearLayout) findViewById(R.id.me_notification_list);
         notificationViews = new TreeSet<NotificationView>();
+
+        if(!FudiApp.hasNetworkConnection()){
+            Toast.makeText(this,
+                    "You need a network connection to view your profile.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
         register = (Button) findViewById(R.id.me_register_button);
         register.setOnClickListener(new View.OnClickListener() {
@@ -55,7 +68,7 @@ public class MeActivity extends AppCompatActivity{
             return;
         }
 
-        User me = FudiApp.getInstance().getThisUser();
+        final User me = FudiApp.getInstance().getThisUser();
 
         TextView username = (TextView) findViewById(R.id.me_username);
         username.setText(me.getUsername());
@@ -67,7 +80,11 @@ public class MeActivity extends AppCompatActivity{
         myFuds.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                FudiApp.getInstance().getUsersFuds(me.getUserID());
+                Intent i = new Intent(MeActivity.this, FudListActivity.class);
+                i.putExtra("button", OWN_PRESSED);
+                i.putExtra("userID", me.getUserID());
+                startActivity(i);
             }
         });
 
@@ -75,7 +92,11 @@ public class MeActivity extends AppCompatActivity{
         commentedOn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                FudiApp.getInstance().getCommentedOnFudsForUser(me.getUserID());
+                Intent i = new Intent(MeActivity.this, FudListActivity.class);
+                i.putExtra("button", COMMENT_PRESSED);
+                i.putExtra("userID", me.getUserID());
+                startActivity(i);
             }
         });
 

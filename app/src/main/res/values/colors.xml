@@ -11,6 +11,7 @@
     <color name="text_entry_border">#F98F7D</color>
     <color name="text_entry_border_blue">#74A6FF</color>
     <color name="text_entry_border_white">#FFFFFF</color>
+    <color name="black">#000000</color>
 
     <color name="grayout">#66010101</color>
 

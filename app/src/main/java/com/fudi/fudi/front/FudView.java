@@ -182,4 +182,18 @@ public class FudView extends View implements Comparable<FudView> {
         }
     }
 
+    public static class FudViewVoteComparator implements Comparator<FudView> {
+
+        @Override
+        public int compare(FudView lhs, FudView rhs) {
+            if(lhs.fud.getVote().getUpvotes() < rhs.fud.getVote().getUpvotes()) {
+                return 1;
+            } else if (lhs.fud.getVote().getUpvotes() == rhs.fud.getVote().getUpvotes()){
+                return 0;
+            } else {
+                return -1;
+            }
+        }
+    }
+
 }

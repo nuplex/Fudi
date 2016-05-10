@@ -29,6 +29,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Space;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.Firebase;
@@ -51,11 +52,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private LinearLayout fudList;
     private TreeSet<FudView> fudViews;
     private ScrollView scroll;
-    private LoadImageInViewTask liivt;
     private FrameLayout mainframe;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ImageManager imgManager;
     private LocationManager locationManager;
+
+    private boolean hotPressed;
+    private boolean newPressed;
 
     protected static final int FUD_CREATION_SUCCESS = 1;
     protected static final int FUD_CREATION_FAILURE = 2;
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     @Override
+    @SuppressWarnings("ConstantConditions")
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
@@ -83,6 +87,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         fudViews = new TreeSet<FudView>();
         mainframe = (FrameLayout) findViewById(R.id.main_frame_layout);
         imgManager = new ImageManager(getApplicationContext());
+        hotPressed = false;
+        newPressed = true;
 
 
         //Starts getting location requests
@@ -113,20 +119,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         scroll.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+                if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
                     for (FudView fv : fudViews) {
                         Rect viewR = new Rect();
                         fv.getDrawingRect(viewR);
                         scroll.getDrawingRect(viewR);
-                        int functionalTop = viewR.top - ImageHandler.pfdp(232 + 20, MainActivity.this);
+                        int functionalTop = viewR.top - ImageHandler.pfdp(232 + 20 + 45, MainActivity.this);
                         int functionalBottom = viewR.bottom;
                         int thisTop = fv.getTopInScroll();
-                        if(thisTop < functionalBottom && thisTop > functionalTop){
-                            if(!fv.imageIsLoaded()){
+                        if (thisTop < functionalBottom && thisTop > functionalTop) {
+                            if (!fv.imageIsLoaded()) {
                                 fv.loadImage();
                             }
                         } else {
-                            if(fv.imageIsLoaded()){
+                            if (fv.imageIsLoaded()) {
                                 fv.unloadImage();
                             }
                         }
@@ -140,9 +146,38 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
 
+        final TextView newButton = (TextView) findViewById(R.id.main_new_button);
+        final TextView hotButton = (TextView) findViewById(R.id.main_hot_button);
+
         if (!networkCheck()) {
             return;
         }
+
+        newButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!newPressed) {
+                    newButton.setBackgroundColor(getResources().getColor(R.color.secondary_color_darker2));
+                    hotButton.setBackgroundColor(getResources().getColor(R.color.secondary_color_darker));
+                    newPressed = true;
+                    hotPressed = false;
+                    refresh();
+                }
+            }
+        });
+
+        hotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!hotPressed){
+                    newButton.setBackgroundColor(getResources().getColor(R.color.secondary_color_darker));
+                    hotButton.setBackgroundColor(getResources().getColor(R.color.secondary_color_darker2));
+                    newPressed = false;
+                    hotPressed = true;
+                    refresh();
+                }
+            }
+        });
 
         SharedPreferences sharedPref = getSharedPreferences(
                 getString(R.string.preference_file_key), MODE_PRIVATE);
@@ -221,12 +256,14 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     }
                 }).execute();
 
+
     }
+
     @Override
     public void onStop(){
         super.onStop();
 
-        if(firstTimeStopped == true) {
+        if(firstTimeStopped) {
             //Start the Notification Service.
             firstTimeStopped = false;
             Intent intent = new Intent(this, NotificationService.class);
@@ -363,14 +400,21 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     public void pull(){
         Log.i("Pull", "Pull called.");
+        if(hotPressed){
+            organizeByUpvotes();
+        } else {
+
         removeAll();
-        TreeSet<FudDetail> fudDetails = FudiApp.getInstance().getCurrentlyDisplayedFudDetails();
-        if(fudDetails == null){
-            fudDetails =  new TreeSet<FudDetail>();
-            Log.e("ERROR","fuds was null in main, loading empty");
+
+            TreeSet<FudDetail> fudDetails = FudiApp.getInstance().getCurrentlyDisplayedFudDetails();
+            if (fudDetails == null) {
+                fudDetails = new TreeSet<FudDetail>();
+                Log.e("ERROR", "fuds was null in main, loading empty");
+            }
+
+            addFudDetailsToList(fudDetails);
+            display();
         }
-        addFudDetailsToList(fudDetails);
-        display();
     }
 
     public void display(){
@@ -466,16 +510,31 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
 
-    /**
-     * TODO: Implement a feature for the screen where if the user overscrolls the top, the list
-     * is updated, that is, "Pull down top of screen and refresh"
-     *
-     * This is seen in many apps, like Facebook, Instagram, Yikyak
-     * This probably invovles a listener, so a make a private class for that listener, code the
-     * logic there, and add it to fudList (fudList is the one that is being scrolled).
-     *
-     *
-     */
+   public void organizeByUpvotes(){
+       TreeSet<FudView> fvs = new TreeSet<FudView>(new FudView.FudViewVoteComparator());
+       fvs.addAll(fudViews);
+
+       fudList.removeAllViews();
+       for(FudView fv : fudViews){
+           fv.unloadImage();
+       }
+
+       int toDisplay = 3;
+       int pos = 0;
+       for(FudView fv : fvs){
+           fudList.addView(fv.getView());
+           Space between = new Space(MainActivity.this);
+           fudList.addView(between);
+           between.getLayoutParams().height = ImageHandler.pfdp(20,MainActivity.this);
+           fv.setTopInScroll(pos);
+           if(toDisplay >= 0){
+               fv.loadImage();
+               toDisplay--;
+           }
+           pos = pos + ImageHandler.pfdp(232 + 20, this);
+       }
+   }
+
     @Override
     public void onRefresh() {
         // TODO - Joan
@@ -483,71 +542,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         swipeRefreshLayout.setRefreshing(true); // sets the refresh animation
         pull();
         swipeRefreshLayout.setRefreshing(false);
-    }
-
-    private class LoadImageInViewTask extends AsyncTask<Void, Void, Void>{
-
-        int count = 0;
-
-        TreeSet<FudView> views;
-        ScrollView scroll;
-        public int pauseTime;
-
-        public LoadImageInViewTask(TreeSet<FudView> views, ScrollView scroll){
-            this.views = views;
-            this.scroll = scroll;
-            pauseTime = 500;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            while(!isCancelled()) {
-                int cont = 3;
-                count = 0;
-                for (final FudView view : views) {
-                    if(views.size() == 1){
-                        new Handler(Looper.getMainLooper()).post(new Runnable() {
-                            @Override
-                            public void run() {
-                                view.loadImage();
-                            }
-                        });
-                        break;
-                    }
-
-                    if(cont < 0){
-                        break;
-                    }
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Rect scrollBounds = new Rect();
-                            Rect viewBounds = new Rect();
-
-                            scroll.getHitRect(scrollBounds);
-                            view.getLocalVisibleRect(viewBounds);
-                            if (!view.getLocalVisibleRect(scrollBounds)) {
-                                if(view.imageIsLoaded()){
-                                    return;
-                                }
-                                view.loadImage();
-                            } else {
-                                view.unloadImage();
-                            }
-                        }
-                    });
-                    count++;
-                }
-                synchronized (this) {
-                    try {
-                        this.wait(pauseTime);
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
-
-            return null;
-        }
     }
 
 

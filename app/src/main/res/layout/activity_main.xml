@@ -9,7 +9,8 @@
     <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="45dp">
 
         <ScrollView
             android:id="@+id/main_scrollview"
@@ -52,6 +53,38 @@
             android:background="@drawable/new_fud_button"
             android:contentDescription="New Post Button" />
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:background="@color/secondary_color_darker"
+        android:id="@+id/main_new_hot_button_holder">
+
+        <TextView
+            android:layout_width="180dp"
+            android:layout_height="45dp"
+            android:text="NEW"
+            android:id="@+id/main_new_button"
+            android:textSize="18sp"
+            android:singleLine="true"
+            android:gravity="center"
+            android:textColor="@color/default_text_color"
+            android:textStyle="bold"
+            android:background="@color/secondary_color_darker2" />
+
+        <TextView
+            android:layout_width="180dp"
+            android:layout_height="45dp"
+            android:text="HOT"
+            android:id="@+id/main_hot_button"
+            android:textSize="18sp"
+            android:singleLine="true"
+            android:gravity="center"
+            android:textColor="@color/default_text_color"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </FrameLayout>

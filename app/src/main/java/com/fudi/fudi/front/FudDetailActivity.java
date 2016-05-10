@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -66,6 +67,7 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
     private Uri imagePath;
 
     @Override
+    @SuppressWarnings("ConstantConditions")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fud_detail);
@@ -150,8 +152,15 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
 
         //Load in the image
         ImageView image = (ImageView) findViewById(R.id.fud_detail_dish);
-        ImageHandler.getInstance().loadImageIntoImageView(this,image,fudDetail.getImageURL());
-
+        ImageHandler.getInstance().loadImageIntoImageView(this, image, fudDetail.getImageURL());
+        image.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(FudDetailActivity.this, ImageViewActivity.class);
+                i.putExtra("imageURL", fudDetail.getImageURL());
+                startActivity(i);
+            }
+        });
         //Comment Handling
         commentList = (LinearLayout) findViewById(R.id.fud_detail_comment_section);
 
@@ -220,8 +229,6 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
     @Override
     protected void onPause(){
         super.onPause();
-        commentList.removeAllViews();
-        comments.clear();
         System.gc();
     }
 
@@ -393,7 +400,7 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
 
                     final EditText edit = (EditText) addReviewFrame.findViewById(R.id.review_comment_popup_entry);
                     final MinMaxTextWatcher<EditText> emmtw =
-                            new MinMaxTextWatcher<EditText>(edit,40,512,FudDetailActivity.this);
+                            new MinMaxTextWatcher<EditText>(edit, 40, 512, FudDetailActivity.this);
                     edit.addTextChangedListener(emmtw);
 
                     final ImageView image = (ImageView) addReviewFrame.findViewById(R.id.review_comment_popup_image);
@@ -412,15 +419,13 @@ public class FudDetailActivity extends AppCompatActivity implements SwipeRefresh
 
                     ImageButton upload = (ImageButton) addReviewFrame.findViewById(R.id.review_comment_popup_take);
                     upload.setOnClickListener(new TakePicOnClickListener());
-                    ImageButton take  = (ImageButton) addReviewFrame.findViewById(R.id.review_comment_popup_upload);
+                    ImageButton take = (ImageButton) addReviewFrame.findViewById(R.id.review_comment_popup_upload);
                     take.setOnClickListener(new LoadPicOnClickListener());
 
                     ImageButton submit = (ImageButton) addReviewFrame.findViewById(R.id.review_comment_popup_submit);
                     submit.setOnClickListener(new SubmitReviewOnClick(emmtw, edit, image));
                 }
             });
-            reviewButton.setEnabled(false); //TODO fix this
-
 
             //General Button
             Button generalButton =  (Button) mainframe.findViewById(R.id.comment_chooser_popup_general_button);

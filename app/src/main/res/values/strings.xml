@@ -10,6 +10,7 @@
     <string name="title_activity_fud_creation">New Fud!</string>
     <string name="preference_file_key">com.fudi.fudi.LOCAL</string>
     <string name="title_activity_location_pick">Location Settings</string>
+    <string name="title_activity_image_view"></string>
 
     <string name="no_connection">Could not connect to a network :(</string>
 

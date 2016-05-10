@@ -2,7 +2,10 @@ package com.fudi.fudi.front;
 
 import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -65,6 +68,14 @@ public class ReviewCommentView extends CommentView {
         //Load in the image
         ImageView image = (ImageView) commentView.findViewById(R.id.review_comment_image);
         ImageHandler.getInstance().loadImageIntoImageView(context,image,comment.getProofImageURL());
+        image.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(ReviewCommentView.this.context, ImageViewActivity.class);
+                i.putExtra("imageURL", ReviewCommentView.this.comment.getProofImageURL());
+                ReviewCommentView.this.context.startActivity(i);
+            }
+        });
     }
 
     /**

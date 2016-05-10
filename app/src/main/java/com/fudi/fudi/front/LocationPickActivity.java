@@ -148,7 +148,6 @@ public class LocationPickActivity extends FragmentActivity implements OnMapReady
             public void onClick(View v) {
                 AlertDialog.Builder confirmLocation = new AlertDialog.Builder(LocationPickActivity.this);
                 confirmLocation.setCancelable(true);
-                confirmLocation.setIcon(R.drawable.fudi_icon);
                 confirmLocation.setMessage(R.string.confirm_change_message);
                 confirmLocation.setTitle(R.string.confirm_change_title);
                 confirmLocation.setPositiveButton(R.string.remove_circle_yes, new DialogInterface.OnClickListener() {
@@ -196,7 +195,6 @@ public class LocationPickActivity extends FragmentActivity implements OnMapReady
                             AlertDialog.Builder(LocationPickActivity.this);
 
                     removeCircle.setMessage(R.string.remove_circle_warning);
-                    removeCircle.setIcon(R.drawable.fudi_icon);
                     removeCircle.setTitle(R.string.remove_circle_title);
 
                     removeCircle.setNegativeButton(R.string.remove_circle_no, new DialogInterface.OnClickListener() {
