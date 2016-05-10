@@ -26,6 +26,7 @@ public class GeneralComment extends Comment {
         v.setUpvotes((long) hm.get("upvotes"));
         v.setDownvotes((long) hm.get("downvotes"));
         gc.setTimestamp(new Date((Long) hm.get("timestamp")));
+        gc.setCommentNumber((long) hm.get("commentNumber"));
         return gc;
     }
 }

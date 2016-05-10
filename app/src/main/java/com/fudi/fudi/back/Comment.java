@@ -27,7 +27,18 @@ public abstract class Comment implements Comparable<Comment>, Voteable {
         this.parent = parent;
         timestamp = Calendar.getInstance().getTime();
         vote = new Vote(whoPosted.getUserID());
-        commentNumber = -1;
+        commentNumber = getCommentNumberFromParent();
+    }
+
+    public long getCommentNumberFromParent(){
+        int count = 1;
+        for(Comment c : parent.getComments()){
+            if(c.equals(this)){
+                return count;
+            }
+            count++;
+        }
+        return -1;
     }
 
     public void setCommentNumber(long l){
@@ -70,7 +81,7 @@ public abstract class Comment implements Comparable<Comment>, Voteable {
             return false;
         } else {
             Comment c = (Comment) o;
-            return text.equals(c.text) && whoPosted.equals(c.whoPosted)
+            return text.equals(c.text) && whoPosted.getUserID().equals(c.whoPosted.getUserID())
                     && parent.equals(c.parent) && timestamp.equals(c.timestamp);
         }
     }
@@ -108,6 +119,7 @@ public abstract class Comment implements Comparable<Comment>, Voteable {
         info.put("upvotes", v.getUpvotes());
         info.put("downvotes", v.getDownvotes());
         info.put("netvote", v.getNet());
+        info.put("commentNumber", commentNumber);
         return info;
     }
 

@@ -53,6 +53,7 @@ public class ReviewComment extends Comment {
         v.setUpvotes((long) hm.get("upvotes"));
         v.setDownvotes((long) hm.get("downvotes"));
         rc.setTimestamp(new Date((Long) hm.get("timestamp")));
+        rc.setCommentNumber((long) hm.get("commentNumber"));
         return rc;
     }
 
